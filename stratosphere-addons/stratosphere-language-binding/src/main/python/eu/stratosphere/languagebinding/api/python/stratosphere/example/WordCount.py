@@ -43,8 +43,8 @@ if __name__ == "__main__":
         .flatmap(Tokenizer(),(Types.INT, Types.STRING))\
         .group_by(1)\
         .groupreduce(Adder(), (Types.INT, Types.STRING))\
-        .output()
-
+        .write_csv("hdfs:/tmp/python/output")
+    
     env.set_degree_of_parallelism(208)
 
     env.execute()

@@ -44,7 +44,7 @@ if __name__ == "__main__":
         .group_by(1)\
         .groupreduce(Adder(), (Types.INT, Types.STRING))\
         .write_csv("hdfs:/tmp/python/output")
-    
-    env.set_degree_of_parallelism(208)
+
+    env.set_degree_of_parallelism(104)
 
     env.execute()

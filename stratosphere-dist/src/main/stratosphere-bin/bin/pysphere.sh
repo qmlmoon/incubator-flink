@@ -17,4 +17,4 @@
 bin=`dirname "$0"`
 bin=`cd "$bin"; pwd`
 
-. "$bin"/stratosphere -j run lib/stratosphere-language-binding-0.6-SNAPSHOT.jar "$@"
+. "$bin"/stratosphere run -j lib/stratosphere-language-binding-0.6-SNAPSHOT.jar "$@"

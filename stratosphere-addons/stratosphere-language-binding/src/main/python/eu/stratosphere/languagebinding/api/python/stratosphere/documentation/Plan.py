@@ -61,9 +61,9 @@ mapped_data = data.map(Splitter(), [Types.INT, Types.STRING])
 Whether this is necessary can be determined from the signature. Note that currently only basic python types are
 fully supported, other types will be converted to strings. This has to be accounted for when specifying the types.
 
-To submit a plan to stratosphere, supply the stratosphere-language-binding jar file, along with the path to
+To submit a plan to stratosphere, call ./bin/pysphere.sh, along with the path to
 your package containing all files related to your program, as well as the path to the python file containing the plan.
-e.g.: ./bin/stratosphere run -j lib/stratosphere-language-binding.jar /path/to/package /path/to/plan
+e.g.: ./bin/pysphere.sh /path/to/package /path/to/plan
 
 Hybrid Plans:
 If the plan is written in Java then every function has to be contained in it's own python script. The above function

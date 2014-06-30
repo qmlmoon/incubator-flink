@@ -89,5 +89,7 @@ public abstract class Sender {
 		}
 	}
 
+	public abstract void sendContinueSignal() throws IOException;
+	
 	public abstract void sendCompletionSignal() throws IOException;
 }

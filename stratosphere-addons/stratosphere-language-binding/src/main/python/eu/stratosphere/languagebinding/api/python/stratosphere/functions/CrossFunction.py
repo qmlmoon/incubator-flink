@@ -21,10 +21,9 @@ class CrossFunction(Function.Function):
     def __init__(self):
         super(CrossFunction, self).__init__()
 
-    def run(self):
-        while True:
-            result = self.cross(self.iterator.next(), self.iterator.next())
-            self.collector.collect(result)
+    def function(self):
+        result = self.cross(self.iterator.next(), self.iterator.next())
+        self.collector.collect(result)
 
     @abstractmethod
     def cross(self, value1, value2):

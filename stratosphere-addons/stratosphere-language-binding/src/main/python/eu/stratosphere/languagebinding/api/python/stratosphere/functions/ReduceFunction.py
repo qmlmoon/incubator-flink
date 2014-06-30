@@ -21,10 +21,9 @@ class ReduceFunction(Function.Function):
     def __init__(self):
         super(ReduceFunction, self).__init__()
 
-    def run(self):
-        while True:
-            result = self.reduce(self.iterator.next(), self.iterator.next())
-            self.collector.collect(result)
+    def function(self):
+        result = self.reduce(self.iterator.next(), self.iterator.next())
+        self.collector.collect(result)
 
     @abstractmethod
     def reduce(self, value1, value2):

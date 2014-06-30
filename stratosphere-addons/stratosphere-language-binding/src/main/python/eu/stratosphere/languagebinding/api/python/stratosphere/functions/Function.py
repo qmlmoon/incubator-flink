@@ -28,6 +28,10 @@ class Function(object):
         self.collector = Collector.ProtoCollector(self.connection)
         self.context = RuntimeContext.RuntimeContext(self.iterator, self.collector)
 
-    @abstractmethod
     def run(self):
+        while self.iterator.next():
+            self.function()
+
+    @abstractmethod
+    def function(self):
         pass

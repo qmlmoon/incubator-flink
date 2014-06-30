@@ -17,6 +17,7 @@ package eu.stratosphere.languagebinding.api.java.proto.streaming;
  */
 public class ProtoSignals {
 	public static final int PROTO_SIGNAL_DONE = -1;
+	public static final int PROTO_SIGNAL_CONT = -2;
 
 	private ProtoSignals() {
 	}

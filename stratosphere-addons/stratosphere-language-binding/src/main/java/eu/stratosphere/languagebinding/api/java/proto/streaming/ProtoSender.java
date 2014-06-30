@@ -17,6 +17,7 @@ import eu.stratosphere.api.java.tuple.Tuple;
 import eu.stratosphere.api.java.tuple.Tuple1;
 import eu.stratosphere.languagebinding.api.java.proto.ProtocolTuple;
 import eu.stratosphere.languagebinding.api.java.proto.ProtocolTuple.ProtoTuple;
+import static eu.stratosphere.languagebinding.api.java.proto.streaming.ProtoSignals.PROTO_SIGNAL_CONT;
 import static eu.stratosphere.languagebinding.api.java.proto.streaming.ProtoSignals.PROTO_SIGNAL_DONE;
 import eu.stratosphere.languagebinding.api.java.streaming.Converter;
 import eu.stratosphere.languagebinding.api.java.streaming.Sender;
@@ -69,6 +70,11 @@ public class ProtoSender extends Sender {
 	@Override
 	public void sendCompletionSignal() throws IOException {
 		sendSize(PROTO_SIGNAL_DONE);
+	}
+	
+	@Override
+	public void sendContinueSignal() throws IOException {
+		sendSize(PROTO_SIGNAL_CONT);
 	}
 
 	private void sendSize(int serializedSize) throws IOException {

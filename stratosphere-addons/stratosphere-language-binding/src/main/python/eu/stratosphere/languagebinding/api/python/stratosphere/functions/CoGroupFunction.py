@@ -24,11 +24,10 @@ class CoGroupFunction(Function.Function):
         self.dummy1 = Iterator.Dummy(self.iterator, 0)
         self.dummy2 = Iterator.Dummy(self.iterator, 1)
 
-    def run(self):
-        while True:
-            self.co_group(self.dummy1, self.dummy2, self.collectort)
-            self.collector.send_signal(Iterator.ProtoIterator.ITERATOR_SIGNAL_DONE)
-            self.iterator._reset()
+    def function(self):
+        self.co_group(self.dummy1, self.dummy2, self.collectort)
+        self.collector.send_signal(Iterator.ProtoIterator.ITERATOR_SIGNAL_DONE)
+        self.iterator._reset()
 
     @abstractmethod
     def co_group(self, iterator1, iterator2, collector):

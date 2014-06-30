@@ -72,6 +72,7 @@ public abstract class Streamer {
 	 * @throws IOException 
 	 */
 	public Object stream(Object record) throws IOException {
+		sender.sendContinueSignal();
 		sender.sendRecord(record);
 		Object result = receiver.receiveRecord();
 		return result;
@@ -86,6 +87,7 @@ public abstract class Streamer {
 	 * @throws IOException
 	 */
 	public Object stream(Object record1, Object record2) throws IOException {
+		sender.sendContinueSignal();
 		sender.sendRecord(record1);
 		sender.sendRecord(record2);
 		return receiver.receiveRecord();
@@ -100,6 +102,7 @@ public abstract class Streamer {
 	 * @throws IOException
 	 */
 	public Object streamWithGroups(Object record1, Object record2) throws IOException {
+		sender.sendContinueSignal();
 		sender.sendRecord(record1, 0);
 		sender.sendRecord(record2, 1);
 		return receiver.receiveRecord();
@@ -113,7 +116,7 @@ public abstract class Streamer {
 	 * @throws IOException 
 	 */
 	public void stream(Object record, Collector collector) throws IOException {
-		sender.sendRecord(1);
+		sender.sendContinueSignal();
 		if (!receiver.isAlive()) {
 			receiver.start();
 		}
@@ -136,7 +139,7 @@ public abstract class Streamer {
 	 * @throws IOException 
 	 */
 	public void stream(Iterator iterator, Collector collector) throws IOException {
-		sender.sendRecord(1);
+		sender.sendContinueSignal();
 		if (!receiver.isAlive()) {
 			receiver.start();
 		}
@@ -160,6 +163,7 @@ public abstract class Streamer {
 	 * @throws IOException
 	 */
 	public void stream(Iterator iterator1, Iterator iterator2, Collector collector) throws IOException {
+		sender.sendContinueSignal();
 		if (!receiver.isAlive()) {
 			receiver.start();
 		}

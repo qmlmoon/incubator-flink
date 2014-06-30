@@ -15,17 +15,15 @@ from abc import ABCMeta, abstractmethod
 from stratosphere.functions import Function
 from stratosphere.connection import Iterator
 
-
 class FlatMapFunction(Function.Function):
     __metaclass__ = ABCMeta
 
     def __init__(self):
         super(FlatMapFunction, self).__init__()
 
-    def run(self):
-        while self.iterator.next() is not None:
-            self.flat_map(self.iterator.next(), self.collector)
-            self.collector.send_signal(Iterator.ProtoIterator.ITERATOR_SIGNAL_DONE)
+    def function(self):
+        self.flat_map(self.iterator.next(), self.collector)
+        self.collector.send_signal(Iterator.ProtoIterator.ITERATOR_SIGNAL_DONE)
 
     @abstractmethod
     def flat_map(self, value, collector):

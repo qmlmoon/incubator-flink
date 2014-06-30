@@ -17,7 +17,6 @@ from collections import deque
 from stratosphere.connection import ProtoConversion
 from stratosphere.proto import ProtoTuple_pb2
 
-
 class Iterator(object):
     __metaclass__ = ABCMeta
 
@@ -189,7 +188,9 @@ class ProtoIterator(Iterator):
 
     #Reads the next record. Should not be called directly.
     def _read_record(self):
-        if self.last_size < 1:
+        if self.last_size == -2:
+            return -2
+        if self.last_size == -1:
             return None
         raw_data = self.connection.receive(self.last_size)
         parsed_data = ProtoTuple_pb2.ProtoTuple()

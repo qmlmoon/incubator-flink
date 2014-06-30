@@ -21,10 +21,9 @@ class MapFunction(Function.Function):
     def __init__(self):
         super(MapFunction, self).__init__()
 
-    def run(self):
-        while True:
-            result = self.map(self.iterator.next())
-            self.collector.collect(result)
+    def function(self):
+        result = self.map(self.iterator.next())
+        self.collector.collect(result)
 
     @abstractmethod
     def map(self, value):

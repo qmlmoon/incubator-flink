@@ -21,10 +21,9 @@ class JoinFunction(Function.Function):
     def __init__(self):
         super(JoinFunction, self).__init__()
 
-    def run(self):
-        while True:
-            result = self.join(self.iterator.next(), self.iterator.next())
-            self.collector.collect(result)
+    def function(self):
+        result = self.join(self.iterator.next(), self.iterator.next())
+        self.collector.collect(result)
 
     @abstractmethod
     def join(self, value1, value2):

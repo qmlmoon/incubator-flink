@@ -31,16 +31,12 @@ public class StreamPrinter extends Thread {
 
 	@Override
 	public void run() {
-		boolean done = false;
-		while (!done) {
-			try {
-				String line = reader.readLine();
-				if (line != null) {
-					System.out.println(line);
-				}
-			} catch (IOException ex) {
-				done = true;
+		String line;
+		try {
+			while ((line = reader.readLine()) != null) {
+				System.out.println(line);
 			}
+		} catch (IOException ex) {
 		}
 	}
 }

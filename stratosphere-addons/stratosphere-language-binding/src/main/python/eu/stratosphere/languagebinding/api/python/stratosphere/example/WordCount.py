@@ -14,6 +14,7 @@ from stratosphere.plan.Environment import get_environment
 from stratosphere.plan.Constants import Types
 from stratosphere.functions.FlatMapFunction import FlatMapFunction
 from stratosphere.functions.GroupReduceFunction import GroupReduceFunction
+from stratosphere.plan.OutputFormat import WriteMode
 import re
 
 
@@ -43,8 +44,8 @@ if __name__ == "__main__":
         .flatmap(Tokenizer(),(Types.INT, Types.STRING))\
         .group_by(1)\
         .groupreduce(Adder(), (Types.INT, Types.STRING))\
-        .write_csv("hdfs:/tmp/python/output")
+        .write_csv("hdfs:/tmp/python/output/", WriteMode.OVERWRITE)
 
-    env.set_degree_of_parallelism(104)
+    env.set_degree_of_parallelism(208)
 
     env.execute()

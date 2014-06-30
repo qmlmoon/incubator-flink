@@ -20,6 +20,11 @@ class OutputIdentifier(object):
     PRINT = "print"
 
 
+class WriteMode(object):
+    NO_OVERWRITE = 0
+    OVERWRITE = 1
+
+
 class _OutputFormat(object):
     __metaclass__ = ABCMeta
 
@@ -29,10 +34,10 @@ class _OutputFormat(object):
 
 
 class TextOutputFormat(_OutputFormat):
-    def __init__(self, file_path):
+    def __init__(self, file_path, write_mode=WriteMode.NO_OVERWRITE):
         super(TextOutputFormat, self).__init__()
         self._identifier = OutputIdentifier.TEXT
-        self._arguments += (file_path,)
+        self._arguments = (file_path, write_mode)
 
 
 class JDBCOutputFormat(_OutputFormat):
@@ -51,10 +56,10 @@ class JDBCOutputFormat(_OutputFormat):
 
 
 class CSVOutputFormat(_OutputFormat):
-    def __init__(self, file_path):
+    def __init__(self, file_path, write_mode=WriteMode.NO_OVERWRITE):
         super(CSVOutputFormat, self).__init__()
         self._identifier = OutputIdentifier.CSV
-        self._arguments += (file_path,)
+        self._arguments = (file_path, write_mode)
 
 
 class PrintingOutputFormat(_OutputFormat):

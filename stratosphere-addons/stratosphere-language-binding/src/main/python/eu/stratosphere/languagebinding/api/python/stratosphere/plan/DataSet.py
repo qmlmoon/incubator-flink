@@ -34,22 +34,24 @@ class Set(object):
         """
         self._create_sink(PrintingOutputFormat())
 
-    def write_text(self, path):
+    def write_text(self, path, write_mode):
         """
         Writes a DataSet as a text file to the specified location.
 
         :param path: he path pointing to the location the text file is written to.
+        :param write_mode: OutputFormat.WriteMode value, indicating whether files should be overwritten
         """
-        self._create_sink(TextOutputFormat(path))
+        self._create_sink(TextOutputFormat(path, write_mode))
 
-    def write_csv(self, path):
+    def write_csv(self, path, write_mode):
         """
         Writes a Tuple DataSet as a CSV file to the specified location.
 
         Note: Only a Tuple DataSet can written as a CSV file.
         :param path: The path pointing to the location the CSV file is written to.
+        :param write_mode: OutputFormat.WriteMode value, indicating whether files should be overwritten
         """
-        self._create_sink(CSVOutputFormat(path))
+        self._create_sink(CSVOutputFormat(path, write_mode))
 
     def _create_sink(self, output_format):
         dic = dict()

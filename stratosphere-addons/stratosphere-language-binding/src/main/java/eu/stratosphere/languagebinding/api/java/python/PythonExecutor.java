@@ -376,7 +376,16 @@ public class PythonExecutor {
 	}
 
 	private static void createCsvSink(int id, Tuple args) {
-		((DataSet) sets.get(id)).output(new CsvOutputFormat(new Path((String) args.getField(0))));
+		CsvOutputFormat out = new CsvOutputFormat(new Path((String) args.getField(0)));
+		switch ((Integer) args.getField(1)) {
+			case 0:
+				out.setWriteMode(FileSystem.WriteMode.NO_OVERWRITE);
+				break;
+			case 1:
+				out.setWriteMode(FileSystem.WriteMode.OVERWRITE);
+				break;
+		}
+		((DataSet) sets.get(id)).output(out);
 	}
 
 	private static void createJDBCSink(int id, Tuple args) {

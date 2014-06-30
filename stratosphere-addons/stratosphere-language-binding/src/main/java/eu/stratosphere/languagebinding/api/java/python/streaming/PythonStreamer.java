@@ -130,6 +130,5 @@ public class PythonStreamer extends Streamer {
 	@Override
 	public void close() throws IOException {
 		super.close();
-		process.destroy();
 	}
 }

@@ -41,6 +41,7 @@ public abstract class Streamer {
 	 @throws IOException 
 	 */
 	public void close() throws IOException {
+		sender.sendCompletionSignal();
 		if (receiver.isAlive()) {
 			boolean done = false;
 			while (!done) {
@@ -112,6 +113,7 @@ public abstract class Streamer {
 	 * @throws IOException 
 	 */
 	public void stream(Object record, Collector collector) throws IOException {
+		sender.sendRecord(1);
 		if (!receiver.isAlive()) {
 			receiver.start();
 		}
@@ -134,6 +136,7 @@ public abstract class Streamer {
 	 * @throws IOException 
 	 */
 	public void stream(Iterator iterator, Collector collector) throws IOException {
+		sender.sendRecord(1);
 		if (!receiver.isAlive()) {
 			receiver.start();
 		}

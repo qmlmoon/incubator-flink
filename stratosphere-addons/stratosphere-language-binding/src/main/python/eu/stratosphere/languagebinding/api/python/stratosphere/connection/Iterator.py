@@ -189,6 +189,8 @@ class ProtoIterator(Iterator):
 
     #Reads the next record. Should not be called directly.
     def _read_record(self):
+        if self.last_size < 1:
+            return None
         raw_data = self.connection.receive(self.last_size)
         parsed_data = ProtoTuple_pb2.ProtoTuple()
         parsed_data.ParseFromString(raw_data)

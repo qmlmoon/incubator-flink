@@ -23,7 +23,7 @@ class FlatMapFunction(Function.Function):
         super(FlatMapFunction, self).__init__()
 
     def run(self):
-        while True:
+        while self.iterator.next() is not None:
             self.flat_map(self.iterator.next(), self.collector)
             self.collector.send_signal(Iterator.ProtoIterator.ITERATOR_SIGNAL_DONE)
 

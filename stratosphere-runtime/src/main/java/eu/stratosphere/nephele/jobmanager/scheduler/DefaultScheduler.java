@@ -147,8 +147,7 @@ public class DefaultScheduler implements InstanceListener, JobStatusListener, Ex
 		final int availableSlots = this.getInstanceManager().getNumberOfSlots();
 
 		if(requiredSlots > availableSlots){
-			throw new SchedulingException("Not enough slots to schedule job " + executionGraph.getJobID() + 
-					" required: " + requiredSlots +" available: " + availableSlots);
+			throw new SchedulingException("Not enough slots to schedule job " + executionGraph.getJobID());
 		}
 
 		// Subscribe to job status notifications

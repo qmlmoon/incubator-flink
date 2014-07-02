@@ -13,7 +13,6 @@
 from abc import ABCMeta, abstractmethod
 
 from stratosphere.functions import Function
-from stratosphere.connection import Iterator
 
 
 class GroupReduceFunction(Function.Function):

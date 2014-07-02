@@ -13,7 +13,7 @@
 from abc import ABCMeta, abstractmethod
 
 from stratosphere.functions import Function
-from stratosphere.connection import Iterator
+
 
 class FlatMapFunction(Function.Function):
     __metaclass__ = ABCMeta

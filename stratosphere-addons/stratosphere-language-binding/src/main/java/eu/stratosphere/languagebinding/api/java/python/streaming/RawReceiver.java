@@ -10,24 +10,22 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  * ********************************************************************************************************************/
-package eu.stratosphere.languagebinding.api.java.proto.streaming;
+package eu.stratosphere.languagebinding.api.java.python.streaming;
 
 import eu.stratosphere.api.common.functions.AbstractFunction;
 import eu.stratosphere.api.java.tuple.Tuple;
-import eu.stratosphere.languagebinding.api.java.proto.streaming.RawSender.SupportedTypes;
-import static eu.stratosphere.languagebinding.api.java.proto.streaming.RawSender.TYPE_BOOLEAN;
-import static eu.stratosphere.languagebinding.api.java.proto.streaming.RawSender.TYPE_BYTE;
-import static eu.stratosphere.languagebinding.api.java.proto.streaming.RawSender.TYPE_DOUBLE;
-import static eu.stratosphere.languagebinding.api.java.proto.streaming.RawSender.TYPE_INTEGER;
-import static eu.stratosphere.languagebinding.api.java.proto.streaming.RawSender.TYPE_LONG;
-import static eu.stratosphere.languagebinding.api.java.proto.streaming.RawSender.TYPE_NULL;
-import static eu.stratosphere.languagebinding.api.java.proto.streaming.RawSender.TYPE_SHORT;
-import static eu.stratosphere.languagebinding.api.java.proto.streaming.RawSender.TYPE_STRING;
+import static eu.stratosphere.languagebinding.api.java.python.streaming.RawSender.TYPE_BOOLEAN;
+import static eu.stratosphere.languagebinding.api.java.python.streaming.RawSender.TYPE_BYTE;
+import static eu.stratosphere.languagebinding.api.java.python.streaming.RawSender.TYPE_DOUBLE;
+import static eu.stratosphere.languagebinding.api.java.python.streaming.RawSender.TYPE_INTEGER;
+import static eu.stratosphere.languagebinding.api.java.python.streaming.RawSender.TYPE_LONG;
+import static eu.stratosphere.languagebinding.api.java.python.streaming.RawSender.TYPE_NULL;
+import static eu.stratosphere.languagebinding.api.java.python.streaming.RawSender.TYPE_SHORT;
+import static eu.stratosphere.languagebinding.api.java.python.streaming.RawSender.TYPE_STRING;
 import eu.stratosphere.languagebinding.api.java.streaming.Receiver;
 import eu.stratosphere.util.Collector;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
 
 public class RawReceiver extends Receiver {

@@ -12,7 +12,6 @@
  * *******************************************************************************************************************/
 package eu.stratosphere.languagebinding.api.java.python.functions;
 
-import com.google.protobuf.InvalidProtocolBufferException;
 import eu.stratosphere.api.java.functions.ReduceFunction;
 import eu.stratosphere.configuration.Configuration;
 import eu.stratosphere.languagebinding.api.java.python.streaming.PythonStreamer;
@@ -70,9 +69,6 @@ public class PythonReduce<IN> extends ReduceFunction<IN> {
 	public final IN reduce(IN value1, IN value2) throws IOException {
 		try {
 			return (IN) streamer.stream(value1, value2);
-		} catch (InvalidProtocolBufferException ipbe) {
-			throw new IOException("An error occurred while receiving data. This usually means that the python process "
-					+ "has prematurely terminated (or may have never started)", ipbe);
 		} catch (IOException ioe) {
 			if (ioe.getMessage().startsWith("Stream closed")) {
 				throw new IOException(

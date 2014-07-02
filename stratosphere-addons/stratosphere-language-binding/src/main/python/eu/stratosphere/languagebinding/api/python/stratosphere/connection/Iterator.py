@@ -127,7 +127,7 @@ class RawIterator(Iterator):
             if case(Constants.TYPE_STRING):
                 raw_size = self.connection.receive(4)
                 size = struct.unpack(">i", raw_size)[0]
-                if size==0:
+                if size == 0:
                     return ""
                 return self.connection.receive(size)
             if case(Constants.TYPE_NULL):

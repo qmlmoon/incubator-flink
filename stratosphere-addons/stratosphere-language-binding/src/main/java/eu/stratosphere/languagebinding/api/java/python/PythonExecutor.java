@@ -40,8 +40,8 @@ import static eu.stratosphere.api.java.typeutils.BasicTypeInfo.STRING_TYPE_INFO;
 import static eu.stratosphere.api.java.typeutils.TypeExtractor.getForObject;
 import eu.stratosphere.core.fs.FileSystem;
 import eu.stratosphere.core.fs.Path;
-import eu.stratosphere.languagebinding.api.java.proto.streaming.RawReceiver;
-import eu.stratosphere.languagebinding.api.java.proto.streaming.RawSender;
+import eu.stratosphere.languagebinding.api.java.python.streaming.RawReceiver;
+import eu.stratosphere.languagebinding.api.java.python.streaming.RawSender;
 //CHECKSTYLE.OFF: AvoidStarImport - enum/function import
 import static eu.stratosphere.languagebinding.api.java.python.PythonExecutor.OperationInfo.*;
 import eu.stratosphere.languagebinding.api.java.python.functions.*;

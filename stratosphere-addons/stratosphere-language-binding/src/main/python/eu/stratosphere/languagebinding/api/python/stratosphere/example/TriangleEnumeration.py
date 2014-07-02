@@ -141,7 +141,7 @@ if __name__ == "__main__":
         .using(TriadFilter(), [Types.INT, Types.INT, Types.INT])
 
     triangles.output()
-    
+
     env.set_degree_of_parallelism(4)
 
     env.execute()

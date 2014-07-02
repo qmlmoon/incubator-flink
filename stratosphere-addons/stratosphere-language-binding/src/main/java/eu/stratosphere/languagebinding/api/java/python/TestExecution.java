@@ -24,6 +24,7 @@ public class TestExecution {
 	public static void main(String[] args) throws Exception {
 		PythonExecutor.main(new String[]{
 			new File("src/main/python/eu/stratosphere/languagebinding/api/python/stratosphere/").getAbsolutePath(),
-			new File("src/main/python/eu/stratosphere/languagebinding/api/python/stratosphere/example/TriangleEnumeration.py").getAbsolutePath()});
+			new File(
+			"src/main/python/eu/stratosphere/languagebinding/api/python/stratosphere/example/TriangleEnumeration.py").getAbsolutePath()});
 	}
 }

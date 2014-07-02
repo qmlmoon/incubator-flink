@@ -10,7 +10,7 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  * ********************************************************************************************************************/
-package eu.stratosphere.languagebinding.api.java.proto.streaming;
+package eu.stratosphere.languagebinding.api.java.python.streaming;
 
 import eu.stratosphere.api.common.functions.AbstractFunction;
 import eu.stratosphere.api.java.tuple.Tuple;

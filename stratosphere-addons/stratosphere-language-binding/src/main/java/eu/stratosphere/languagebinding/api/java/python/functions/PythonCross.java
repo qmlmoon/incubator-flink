@@ -12,7 +12,6 @@
  * ********************************************************************************************************************/
 package eu.stratosphere.languagebinding.api.java.python.functions;
 
-import com.google.protobuf.InvalidProtocolBufferException;
 import eu.stratosphere.api.java.functions.CrossFunction;
 import eu.stratosphere.api.java.typeutils.ResultTypeQueryable;
 import static eu.stratosphere.api.java.typeutils.TypeExtractor.getForObject;
@@ -79,9 +78,6 @@ public class PythonCross<IN1, IN2, OUT> extends CrossFunction<IN1, IN2, OUT> imp
 	public final OUT cross(IN1 first, IN2 second) throws Exception {
 		try {
 			return (OUT) streamer.streamWithGroups(first, second);
-		} catch (InvalidProtocolBufferException ipbe) {
-			throw new IOException("An error occurred while receiving data. This usually means that the python process "
-					+ "has prematurely terminated (or may have never started)", ipbe);
 		} catch (IOException ioe) {
 			if (ioe.getMessage().startsWith("Stream closed")) {
 				throw new IOException(

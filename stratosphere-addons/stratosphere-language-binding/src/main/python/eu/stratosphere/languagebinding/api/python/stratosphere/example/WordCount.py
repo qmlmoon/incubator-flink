@@ -10,12 +10,13 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 ######################################################################################################################
+import re
+
 from stratosphere.plan.Environment import get_environment
 from stratosphere.plan.Constants import Types
 from stratosphere.functions.FlatMapFunction import FlatMapFunction
 from stratosphere.functions.GroupReduceFunction import GroupReduceFunction
 from stratosphere.plan.OutputFormat import WriteMode
-import re
 
 
 class Tokenizer(FlatMapFunction):
@@ -36,14 +37,15 @@ class Adder(GroupReduceFunction):
 
         collector.collect((count, word))
 
+
 if __name__ == "__main__":
     env = get_environment()
     data = env.read_text("hdfs:/datasets/enwiki-latest-pages-meta-current.xml")
 
-    data\
-        .flatmap(Tokenizer(),(Types.INT, Types.STRING))\
-        .group_by(1)\
-        .groupreduce(Adder(), (Types.INT, Types.STRING))\
+    data \
+        .flatmap(Tokenizer(), (Types.INT, Types.STRING)) \
+        .group_by(1) \
+        .groupreduce(Adder(), (Types.INT, Types.STRING)) \
         .write_csv("hdfs:/tmp/python/output/", WriteMode.OVERWRITE)
 
     env.set_degree_of_parallelism(208)

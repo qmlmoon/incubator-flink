@@ -12,7 +12,6 @@
  * ********************************************************************************************************************/
 package eu.stratosphere.languagebinding.api.java.python.functions;
 
-import com.google.protobuf.InvalidProtocolBufferException;
 import eu.stratosphere.api.java.functions.FilterFunction;
 import eu.stratosphere.configuration.Configuration;
 import eu.stratosphere.languagebinding.api.java.python.streaming.PythonStreamer;
@@ -67,9 +66,6 @@ public class PythonFilter<IN> extends FilterFunction<IN> {
 	public final boolean filter(IN value) throws Exception {
 		try {
 			return (Boolean) streamer.stream(value);
-		} catch (InvalidProtocolBufferException ipbe) {
-			throw new IOException("An error occurred while receiving data. This usually means that the python process "
-					+ "has prematurely terminated (or may have never started)", ipbe);
 		} catch (IOException ioe) {
 			if (ioe.getMessage().startsWith("Stream closed")) {
 				throw new IOException(

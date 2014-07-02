@@ -13,8 +13,6 @@
 package eu.stratosphere.languagebinding.api.java.python.streaming;
 
 import eu.stratosphere.api.common.functions.AbstractFunction;
-import eu.stratosphere.languagebinding.api.java.proto.streaming.RawReceiver;
-import eu.stratosphere.languagebinding.api.java.proto.streaming.RawSender;
 import static eu.stratosphere.languagebinding.api.java.python.PythonExecutor.STRATOSPHERE_EXECUTOR_ID;
 import static eu.stratosphere.languagebinding.api.java.python.PythonExecutor.STRATOSPHERE_PLAN_ID;
 import static eu.stratosphere.languagebinding.api.java.python.PythonExecutor.STRATOSPHERE_PYTHON_ID;
@@ -116,7 +114,7 @@ public class PythonStreamer extends Streamer {
 		}
 		process = pb.start();
 		sender = new RawSender(function, process.getOutputStream());
-		receiver =  new RawReceiver(function, process.getInputStream());
+		receiver = new RawReceiver(function, process.getInputStream());
 		//new StreamPrinter(process.getErrorStream()).start();
 	}
 

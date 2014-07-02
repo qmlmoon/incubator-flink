@@ -15,8 +15,6 @@ from stratosphere.plan.Environment import get_environment
 from stratosphere.plan.InputFormat import TextInputFormat
 from stratosphere.plan.OutputFormat import PrintingOutputFormat
 from stratosphere.plan.Constants import Types
-from stratosphere.functions.MapFunction import MapFunction
-import re
 
 
 #1)
@@ -73,10 +71,12 @@ would then look like this:
 from stratosphere.functions.MapFunction import MapFunction
 import re
 
+
 class Splitter(MapFunction):
     def map(self, value):
         split_input = re.split("\W+", input.lower())
         return len(split_input)
+
 
 Splitter().run()
 #=======================================================================================================================

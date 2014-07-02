@@ -14,7 +14,6 @@
  */
 package eu.stratosphere.languagebinding.api.java.python.functions;
 
-import com.google.protobuf.InvalidProtocolBufferException;
 import eu.stratosphere.api.java.functions.GroupReduceFunction;
 import eu.stratosphere.api.java.typeutils.ResultTypeQueryable;
 import static eu.stratosphere.api.java.typeutils.TypeExtractor.getForObject;
@@ -81,9 +80,6 @@ public class PythonGroupReduce<IN, OUT> extends GroupReduceFunction<IN, OUT> imp
 	public final void reduce(Iterator<IN> values, Collector<OUT> out) throws Exception {
 		try {
 			streamer.stream(values, out);
-		} catch (InvalidProtocolBufferException ipbe) {
-			throw new IOException("An error occurred while receiving data. This usually means that the python process "
-					+ "has prematurely terminated (or may have never started)", ipbe);
 		} catch (IOException ioe) {
 			if (ioe.getMessage().startsWith("Stream closed")) {
 				throw new IOException(

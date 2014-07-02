@@ -12,7 +12,6 @@
  * ********************************************************************************************************************/
 package eu.stratosphere.languagebinding.api.java.python.functions;
 
-import com.google.protobuf.InvalidProtocolBufferException;
 import eu.stratosphere.api.java.functions.CoGroupFunction;
 import eu.stratosphere.api.java.typeutils.ResultTypeQueryable;
 import static eu.stratosphere.api.java.typeutils.TypeExtractor.getForObject;
@@ -81,9 +80,6 @@ public class PythonCoGroup<IN1, IN2, OUT> extends CoGroupFunction<IN1, IN2, OUT>
 	public final void coGroup(Iterator<IN1> first, Iterator<IN2> second, Collector<OUT> out) throws Exception {
 		try {
 			streamer.stream(first, second, out);
-		} catch (InvalidProtocolBufferException ipbe) {
-			throw new IOException("An error occurred while receiving data. This usually means that the python process "
-					+ "has prematurely terminated (or may have never started)", ipbe);
 		} catch (IOException ioe) {
 			if (ioe.getMessage().startsWith("Stream closed")) {
 				throw new IOException(

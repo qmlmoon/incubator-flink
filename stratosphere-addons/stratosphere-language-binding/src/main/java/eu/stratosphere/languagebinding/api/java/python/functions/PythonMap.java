@@ -12,7 +12,6 @@
  * ********************************************************************************************************************/
 package eu.stratosphere.languagebinding.api.java.python.functions;
 
-import com.google.protobuf.InvalidProtocolBufferException;
 import eu.stratosphere.api.java.functions.MapFunction;
 import eu.stratosphere.api.java.typeutils.ResultTypeQueryable;
 import static eu.stratosphere.api.java.typeutils.TypeExtractor.getForObject;
@@ -76,9 +75,6 @@ public class PythonMap<IN, OUT> extends MapFunction<IN, OUT> implements ResultTy
 	public final OUT map(IN value) throws Exception {
 		try {
 			return (OUT) streamer.stream(value);
-		} catch (InvalidProtocolBufferException ipbe) {
-			throw new IOException("An error occurred while receiving data. This usually means that the python process "
-					+ "has prematurely terminated (or may have never started)", ipbe);
 		} catch (IOException ioe) {
 			if (ioe.getMessage().startsWith("Stream closed")) {
 				throw new IOException(

@@ -43,7 +43,7 @@ public abstract class Sender {
 	 * @throws IOException
 	 */
 	public void sendRecord(Object tuple) throws IOException {
-		sendRecord(tuple,0,false);
+		sendRecord(tuple, 0, false);
 	}
 
 	/**
@@ -92,6 +92,6 @@ public abstract class Sender {
 	}
 
 	public abstract void sendContinueSignal() throws IOException;
-	
+
 	public abstract void sendCompletionSignal() throws IOException;
 }

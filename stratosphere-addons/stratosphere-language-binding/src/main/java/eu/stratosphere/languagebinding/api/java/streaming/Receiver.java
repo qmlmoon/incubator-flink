@@ -12,7 +12,6 @@
  * ********************************************************************************************************************/
 package eu.stratosphere.languagebinding.api.java.streaming;
 
-import com.google.protobuf.InvalidProtocolBufferException;
 //CHECKSTYLE.OFF: AvoidStarImport - tuple imports
 import eu.stratosphere.api.java.tuple.*;
 //CHECKSTYLE.ON: AvoidStarImport
@@ -48,9 +47,6 @@ public abstract class Receiver extends Thread {
 				} catch (InterruptedException ex) {
 				}
 			}
-		} catch (InvalidProtocolBufferException ipbe) {
-			System.out.println("An error occurred while receiving data. This usually means that the python process "
-					+ "has prematurely terminated (or may have never started)");
 		} catch (IOException ioe) {
 			if (ioe.getMessage().startsWith("Stream closed")) {
 				System.out.println(

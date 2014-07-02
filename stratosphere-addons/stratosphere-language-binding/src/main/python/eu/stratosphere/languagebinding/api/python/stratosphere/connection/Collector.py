@@ -11,11 +11,11 @@
 # specific language governing permissions and limitations under the License.
 ######################################################################################################################
 from abc import ABCMeta, abstractmethod
-
-from stratosphere.connection import ProtoConversion
-from stratosphere.proto import ProtoTuple_pb2
 import struct
+
 from stratosphere.connection.RawConstants import Constants
+
+
 class Collector(object):
     __metaclass__ = ABCMeta
 
@@ -69,30 +69,30 @@ class RawCollector(Collector):
 
     def _send_field(self, value):
         if isinstance(value, basestring):
-            type = struct.pack(">b",Constants.TYPE_STRING)
+            type = struct.pack(">b", Constants.TYPE_STRING)
             self.connection.send(type)
             self.connection.send(value)
         elif isinstance(value, bool):
-            type = struct.pack(">b",Constants.TYPE_BOOLEAN)
+            type = struct.pack(">b", Constants.TYPE_BOOLEAN)
             self.connection.send(type)
             data = struct.pack(">?", value)
             self.connection.send(data)
         elif isinstance(value, int):
-            type = struct.pack(">b",Constants.TYPE_INTEGER)
+            type = struct.pack(">b", Constants.TYPE_INTEGER)
             self.connection.send(type)
             data = struct.pack(">i", value)
             self.connection.send(data)
         elif isinstance(value, long):
-            type = struct.pack(">b",Constants.TYPE_LONG)
+            type = struct.pack(">b", Constants.TYPE_LONG)
             self.connection.send(type)
             data = struct.pack(">l", value)
             self.connection.send(data)
         elif isinstance(value, float):
-            type = struct.pack(">b",Constants.TYPE_DOUBLE)
+            type = struct.pack(">b", Constants.TYPE_DOUBLE)
             self.connection.send(type)
             data = struct.pack(">d", value)
             self.connection.send(data)
         else:
-            type = struct.pack(">b",Constants.TYPE_STRING)
+            type = struct.pack(">b", Constants.TYPE_STRING)
             self.connection.send(type)
             self.connection.send(str(value))

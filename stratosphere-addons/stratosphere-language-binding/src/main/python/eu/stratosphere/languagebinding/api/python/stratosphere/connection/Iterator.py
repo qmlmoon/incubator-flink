@@ -9,13 +9,14 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
-######################################################################################################################
-import threading
+# #####################################################################################################################
 from abc import ABCMeta, abstractmethod
 from collections import deque
+import struct
 
-from stratosphere.connection import ProtoConversion
-from stratosphere.proto import ProtoTuple_pb2
+from stratosphere.utilities.Switch import Switch
+from stratosphere.connection.RawConstants import Constants
+
 
 class Iterator(object):
     __metaclass__ = ABCMeta
@@ -49,208 +50,107 @@ class Iterator(object):
         """
         pass
 
-
-class ProtoIterator(Iterator):
-    #Signal indicating that all records were sent.
-    ITERATOR_SIGNAL_DONE = -1
-    #Flag indicating that no data has been read.
-    ITERATOR_FLAG_INIT = -5
-    #Default mode - Receive a known number of records (usually 1 or 2) and return one record.
-    ITERATOR_MODE_DEF = 0
-    #GroupReduce mode - Receive an unknown number of records of a single group and return any number of records.
-    ITERATOR_MODE_GR = 1
-    #CoGroup mode - Receive an unknown number of records of two different group and return any number of records.
-    ITERATOR_MODE_CG = 2
-
-    def __init__(self, con, mode):
-        super(ProtoIterator, self).__init__(con)
-        self.size_received = False
-        self.last_size = ProtoIterator.ITERATOR_FLAG_INIT
-        self.mode = mode
-        self.cache = deque()
-        #The following properties should never be accessed directly.
-        if self.mode == ProtoIterator.ITERATOR_MODE_CG:
-            #buffers to store values, differentiated by group
-            self.values_a = []
-            self.values_b = []
-            #boolean flag indicating whether all records of the respective group have been read
-            self.done_with_a = False
-            self.done_with_b = False
-            #start thread that receives records in the background
-            self.lock = threading.Condition()
-            self.thread = Receiver(self.connection, self)
-            self.thread.start()
-
-    #Resets this Iterator to resemble a newly instantiated one.
+    @abstractmethod
     def _reset(self):
-        self.last_size = ProtoIterator.ITERATOR_FLAG_INIT
-        self.size_received = False
-        if self.mode == ProtoIterator.ITERATOR_MODE_CG:
-            #buffers to store values, differentiated by group
-            self.thread.join()
-            self.values_a = []
-            self.values_b = []
-            #boolean flag indicating whether all records of the respective group have been read
-            self.done_with_a = False
-            self.done_with_b = False
-            #start thread that receives records in the background
-            self.lock = threading.Condition()
-            self.thread = Receiver(self.connection, self)
-            self.thread.start()
+        pass
 
-    #Returns a list of all remaining elements in this iterator.
-    def all(self, group=-1):
-        values = []
-        while len(self.cache) > 0:
-            values += self.cache.popleft()
-        if group == -1:
-            while self.has_next():
-                values.append(self.next())
+
+class RawIterator(Iterator):
+    def __init__(self, con):
+        super(RawIterator, self).__init__(con)
+        self.cache = deque()
+        self.cache_mode = 0
+        self.was_last0 = False
+        self.was_last1 = False
+
+    def next(self, group=0):
+        if group == self.cache_mode & len(self.cache) > 0:
+            return self.cache.popleft()
+
+        raw_meta = "\x00\x00\x00" + self.connection.receive(1)
+        meta = struct.unpack(">i", raw_meta)[0]
+        if meta == 64:
+            return None
+        if meta == 128:
+            return True
+        record_group = meta >> 7
+
+        if record_group == group:
+            if (meta & 32 == 32):
+                self.was_last0 = True
+            size = meta & 31
+            if size == 0:
+                return self._receive_field()
+            result = ()
+            for i in range(size):
+                result += self._receive_field()
+            return result
         else:
-            while self.has_next(group):
-                values.append(self.next(group))
+            if (meta & 32 == 32):
+                self.was_last1 = True
+            size = meta & 31
+            if size == 0:
+                return self._receive_field()
+            result = ()
+            for i in range(size):
+                result += self._receive_field()
+            if len(self.cache) == 0:
+                self.cache_mode = group
+            self.cache.append(result)
+        return self.next(group)
+
+    def _receive_field(self):
+        raw_type = "\x00\x00\x00" + self.connection.receive(1)
+        type = struct.unpack(">i", raw_type)[0]
+        for case in Switch(type):
+            if case(Constants.TYPE_BOOLEAN):
+                raw_bool = self.connection.receive(1)
+                return struct.unpack(">?", raw_bool)[0]
+            if case(Constants.TYPE_BYTE):
+                raw_byte = self.connection.receive(1)
+                return struct.unpack(">c", raw_byte)[0]
+            if case(Constants.TYPE_FLOAT):
+                raw_float = self.connection.receive(4)
+                return struct.unpack(">f", raw_float)[0]
+            if case(Constants.TYPE_DOUBLE):
+                raw_double = self.connection.receive(8)
+                return struct.unpack(">d", raw_double)[0]
+            if case(Constants.TYPE_SHORT):
+                raw_short = self.connection.receive(2)
+                return struct.unpack(">h", raw_short)[0]
+            if case(Constants.TYPE_INTEGER):
+                raw_int = self.connection.receive(4)
+                return struct.unpack(">i", raw_int)[0]
+            if case(Constants.TYPE_LONG):
+                raw_long = self.connection.receive(8)
+                return struct.unpack(">l", raw_long)[0]
+            if case(Constants.TYPE_STRING):
+                raw_size = self.connection.receive(4)
+                size = struct.unpack(">i", raw_size)[0]
+                if size==0:
+                    return ""
+                return self.connection.receive(size)
+            if case(Constants.TYPE_NULL):
+                return None
+
+    def all(self, group=0):
+        values = []
+        if self.cache_mode == group:
+            while len(self.cache) > 0:
+                values.append(self.cache.popleft())
+        while self.has_next():
+            values.append(self.next())
         return values
 
-    #Returns the next element in this iterator.
-    def next(self, group=0):
-        if len(self.cache) > 0:
-            return self.cache.popleft()
-        if not self.size_received:
-            self.has_next(group, True)
-        self.size_received = False
-        if self.mode == ProtoIterator.ITERATOR_MODE_CG:
-            return self._next_cogroup(group)
-        record = self._read_record()
-        return record
-
-    #This version of next differentiates between two groups.
-    def _next_cogroup(self, group):
-        self.lock.acquire()
+    def has_next(self, group=0):
         if group == 0:
-            while (not self.done_with_a) and (len(self.values_a) == 0):
-                self.lock.wait()
-            value = self.values_a.pop(0)
-            self.lock.notify_all()
-            self.lock.release()
-            return value
-        if group == 1:
-            while (not self.done_with_b) and (len(self.values_b) == 0):
-                self.lock.wait()
-            value = self.values_b.pop(0)
-            self.lock.notify_all()
-            self.lock.release()
-            return value
-        raise ValueError("Invalid group identifier passed to next. Expected: 0/1 Actual: " + str(group))
-
-    #Returns a boolean value indicating whether this iterator contains another element.
-    def has_next(self, group=0, val=False):
-        if not val:
-            self.size_received = True
-        if self.last_size == ProtoIterator.ITERATOR_FLAG_INIT:
-            return self._has_next_initial()
-        if self.mode == ProtoIterator.ITERATOR_MODE_CG:
-            return self._has_next_cogroup(group)
+            return self.was_last0
         else:
-            self.last_size = self._read_size()
-            return not self.last_size == ProtoIterator.ITERATOR_SIGNAL_DONE
+            return self.was_last1
 
-    #This version of has_next is used for the very first call.
-    def _has_next_initial(self):
-        if not self.mode == ProtoIterator.ITERATOR_MODE_CG:
-            self.last_size = self._read_size()
-        return not self.last_size == ProtoIterator.ITERATOR_SIGNAL_DONE
-
-    #This version of has_next differentiates between two groups.
-    def _has_next_cogroup(self, group):
-        self.lock.acquire()
-        if group == 0:
-            #wait until receiver has received the size of the next record (and potentially the end signal)
-            while len(self.values_a) == 0 and not self.done_with_a:
-                self.lock.wait()
-            res = not ((len(self.values_a) == 0) & self.done_with_a)
-            self.lock.notify_all()
-            self.lock.release()
-            return res
-        else:  #wait until receiver has received the size of the next record (and potentially the end signal)
-            while len(self.values_b) == 0 and not self.done_with_b:
-                self.lock.wait()
-            res = not ((len(self.values_b) == 0) & self.done_with_b)
-            self.lock.notify_all()
-            self.lock.release()
-            return res
-
-    #Reads the size of the next record. Should not be called directly.
-    def _read_size(self):
-        size = ProtoTuple_pb2.TupleSize()
-        size_buf = self.connection.receive(5)
-        size.ParseFromString(size_buf)
-        return size.value
-
-    #Reads the next record. Should not be called directly.
-    def _read_record(self):
-        if self.last_size == -2:
-            return -2
-        if self.last_size == -1:
-            return None
-        raw_data = self.connection.receive(self.last_size)
-        parsed_data = ProtoTuple_pb2.ProtoTuple()
-        parsed_data.ParseFromString(raw_data)
-        return ProtoConversion.convert_proto_to_python(parsed_data)
-
-
-#Special object used by a ProtoIterator for GroupReduce functions to receive data for 2 different groups.
-class Receiver(threading.Thread):
-    def __init__(self, connection, iterator):
-        threading.Thread.__init__(self)
-        self.connection = connection
-        self.iterator = iterator
-
-    def _collect10a(self):
-        for x in range(0, 10):
-            self.iterator.last_size = self.iterator._read_size()
-            if self.iterator.last_size == -2:
-                tmp_size = self.iterator.last_size
-                self.iterator.last_size = self.iterator._read_size()
-                self.iterator.cache.append(self.read_record()[1])
-                self.iterator.last_size = tmp_size
-                self.iterator.last_size = self.iterator._read_size()
-            self.iterator.lock.acquire()
-            if self.iterator.last_size == ProtoIterator.ITERATOR_SIGNAL_DONE:
-                self.iterator.done_with_a = True
-                self.iterator.lock.notify_all()
-                self.iterator.lock.release()
-                break
-            record = self.iterator._read_record()
-            self.iterator.values_a.append(record)
-            self.iterator.lock.notify_all()
-            self.iterator.lock.release()
-
-    def _collect10b(self):
-        for x in range(0, 10):
-            self.iterator.last_size = self.iterator._read_size()
-            if self.iterator.last_size == -2:
-                tmp_size = self.iterator.last_size
-                self.iterator.last_size = self.iterator._read_size()
-                self.iterator.cache.append(self.read_record()[1])
-                self.iterator.last_size = tmp_size
-                self.iterator.last_size = self.iterator._read_size()
-            self.iterator.lock.acquire()
-            if self.iterator.last_size == ProtoIterator.ITERATOR_SIGNAL_DONE:
-                self.iterator.done_with_b = True
-                self.iterator.lock.notify_all()
-                self.iterator.lock.release()
-                break
-            record = self.iterator._read_record()
-            self.iterator.values_b.append(record)
-            self.iterator.lock.notify_all()
-            self.iterator.lock.release()
-
-    def run(self):
-        while (not self.iterator.done_with_a) or (not self.iterator.done_with_b):
-            if not self.iterator.done_with_a:
-                self._collect10a()
-            if not self.iterator.done_with_b:
-                self._collect10b()
+    def _reset(self):
+        self.was_last0 = False
+        self.was_last1 = False
 
 
 class Dummy(Iterator):

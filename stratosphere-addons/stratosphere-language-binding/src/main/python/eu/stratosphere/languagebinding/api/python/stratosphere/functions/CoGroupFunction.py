@@ -20,14 +20,15 @@ class CoGroupFunction(Function.Function):
     __metaclass__ = ABCMeta
 
     def __init__(self):
-        super(CoGroupFunction, self).__init__(Iterator.ProtoIterator.ITERATOR_MODE_CG)
+        super(CoGroupFunction, self).__init__()
         self.dummy1 = Iterator.Dummy(self.iterator, 0)
         self.dummy2 = Iterator.Dummy(self.iterator, 1)
 
-    def function(self):
-        self.co_group(self.dummy1, self.dummy2, self.collector)
-        self.collector.send_signal(Iterator.ProtoIterator.ITERATOR_SIGNAL_DONE)
-        self.iterator._reset()
+    def run(self):
+        while self.iterator.next():
+            self.co_group(self.dummy1, self.dummy2, self.collector)
+            self.collector.finish()
+            self.iterator._reset()
 
     @abstractmethod
     def co_group(self, iterator1, iterator2, collector):

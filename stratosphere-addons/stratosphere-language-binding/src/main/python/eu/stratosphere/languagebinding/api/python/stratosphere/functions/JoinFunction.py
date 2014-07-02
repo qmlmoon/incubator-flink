@@ -21,9 +21,14 @@ class JoinFunction(Function.Function):
     def __init__(self):
         super(JoinFunction, self).__init__()
 
-    def function(self):
-        result = self.join(self.iterator.next(), self.iterator.next())
-        self.collector.collect(result)
+    def run(self):
+        while True:
+            value = self.iterator.next()
+            if value is None:
+                break
+            result = self.join(value, self.iterator.next())
+            self.collector.collect(result)
+            self.collector.finish()
 
     @abstractmethod
     def join(self, value1, value2):

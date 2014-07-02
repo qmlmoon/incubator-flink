@@ -21,9 +21,14 @@ class FilterFunction(Function.Function):
     def __init__(self):
         super(FilterFunction, self).__init__()
 
-    def function(self):
-        result = self.filter(self.iterator.next())
-        self.collector.collect(result)
+    def run(self):
+        while True:
+            value = self.iterator.next()
+            if value is None:
+                break
+            result = self.filter(value)
+            self.collector.collect(result)
+            self.collector.finish()
 
     @abstractmethod
     def filter(self, value):

@@ -20,12 +20,13 @@ class GroupReduceFunction(Function.Function):
     __metaclass__ = ABCMeta
 
     def __init__(self):
-        super(GroupReduceFunction, self).__init__(mode=Iterator.ProtoIterator.ITERATOR_MODE_GR)
+        super(GroupReduceFunction, self).__init__()
 
-    def function(self):
-        self.group_reduce(self.iterator, self.collector)
-        self.collector.send_signal(Iterator.ProtoIterator.ITERATOR_SIGNAL_DONE)
-        self.iterator._reset()
+    def run(self):
+        while self.iterator.next():
+            self.group_reduce(self.iterator, self.collector)
+            self.collector.finish()
+            self.iterator._reset()
 
     @abstractmethod
     def group_reduce(self, iterator, collector):

@@ -9,27 +9,16 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
-######################################################################################################################
-from abc import ABCMeta, abstractmethod
-
-from stratosphere.functions import Function
+#######################################################################################################################
 
 
-class CrossFunction(Function.Function):
-    __metaclass__ = ABCMeta
-
-    def __init__(self):
-        super(CrossFunction, self).__init__()
-
-    def run(self):
-        while True:
-            value = self.iterator.next()
-            if value is None:
-                break
-            result = self.cross(value, self.iterator.next())
-            self.collector.collect(result)
-            self.collector.finish()
-
-    @abstractmethod
-    def cross(self, value1, value2):
-        pass
+class Constants(object):
+    TYPE_BOOLEAN = -64
+    TYPE_BYTE = 64
+    TYPE_SHORT = 32
+    TYPE_INTEGER = 16
+    TYPE_LONG = 8
+    TYPE_DOUBLE = 4
+    TYPE_FLOAT = 5
+    TYPE_STRING = 2
+    TYPE_NULL = 0

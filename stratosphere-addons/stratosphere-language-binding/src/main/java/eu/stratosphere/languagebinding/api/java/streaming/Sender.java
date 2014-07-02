@@ -42,7 +42,9 @@ public abstract class Sender {
 	 * @param tuple tuple to send.
 	 * @throws IOException
 	 */
-	public abstract void sendRecord(Object tuple) throws IOException;
+	public void sendRecord(Object tuple) throws IOException {
+		sendRecord(tuple,0,false);
+	}
 
 	/**
 	 * Sends a single record belonging to a specific group to the output stream.
@@ -51,7 +53,7 @@ public abstract class Sender {
 	 * @param group tuple group
 	 * @throws IOException
 	 */
-	public abstract void sendRecord(Object tuple, int group) throws IOException;
+	public abstract void sendRecord(Object tuple, int group, boolean isLast) throws IOException;
 
 	public void sendRecords(Iterator<Object> values) throws IOException {
 		while (values.hasNext()) {
@@ -67,7 +69,7 @@ public abstract class Sender {
 			if (!completionSignalSent1) {
 				for (int c = 0; c < 10; c++) {
 					if (values1.hasNext()) {
-						sendRecord(values1.next(), 0);
+						sendRecord(values1.next(), 0, values1.hasNext());
 					} else {
 						sendCompletionSignal();
 						completionSignalSent1 = true;
@@ -78,7 +80,7 @@ public abstract class Sender {
 			if (!completionSignalSent2) {
 				for (int c = 0; c < 10; c++) {
 					if (values2.hasNext()) {
-						sendRecord(values2.next(), 1);
+						sendRecord(values2.next(), 1, values2.hasNext());
 					} else {
 						sendCompletionSignal();
 						completionSignalSent2 = true;

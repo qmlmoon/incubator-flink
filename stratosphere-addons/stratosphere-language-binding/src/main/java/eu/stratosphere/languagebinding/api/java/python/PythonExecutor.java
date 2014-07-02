@@ -40,13 +40,15 @@ import static eu.stratosphere.api.java.typeutils.BasicTypeInfo.STRING_TYPE_INFO;
 import static eu.stratosphere.api.java.typeutils.TypeExtractor.getForObject;
 import eu.stratosphere.core.fs.FileSystem;
 import eu.stratosphere.core.fs.Path;
-import eu.stratosphere.languagebinding.api.java.proto.streaming.ProtoReceiver;
-import eu.stratosphere.languagebinding.api.java.proto.streaming.ProtoSender;
+import eu.stratosphere.languagebinding.api.java.proto.streaming.RawReceiver;
+import eu.stratosphere.languagebinding.api.java.proto.streaming.RawSender;
 //CHECKSTYLE.OFF: AvoidStarImport - enum/function import
 import static eu.stratosphere.languagebinding.api.java.python.PythonExecutor.OperationInfo.*;
 import eu.stratosphere.languagebinding.api.java.python.functions.*;
 //CHECKSTYLE.ON: AvoidStarImport
+import eu.stratosphere.languagebinding.api.java.streaming.Receiver;
 import static eu.stratosphere.languagebinding.api.java.streaming.Receiver.createTuple;
+import eu.stratosphere.languagebinding.api.java.streaming.Sender;
 import eu.stratosphere.languagebinding.api.java.streaming.StreamPrinter;
 import eu.stratosphere.pact.runtime.cache.FileCache;
 import java.io.File;
@@ -60,8 +62,8 @@ import java.util.HashMap;
  This class allows the execution of a stratosphere plan written in python.
  */
 public class PythonExecutor {
-	private static ProtoSender sender;
-	private static ProtoReceiver receiver;
+	private static Sender sender;
+	private static Receiver receiver;
 	private static Process process;
 	private static HashMap<Integer, Object> sets;
 	private static ExecutionEnvironment env;
@@ -127,8 +129,8 @@ public class PythonExecutor {
 	private static void open(String[] args) throws IOException {
 		sets = new HashMap();
 		process = Runtime.getRuntime().exec("python " + tmpPlanPath, args);
-		sender = new ProtoSender(null, process.getOutputStream());
-		receiver = new ProtoReceiver(null, process.getInputStream());
+		sender = new RawSender(null, process.getOutputStream());
+		receiver = new RawReceiver(null, process.getInputStream());
 		new StreamPrinter(process.getErrorStream()).start();
 	}
 
@@ -241,13 +243,13 @@ public class PythonExecutor {
 
 	private static void receiveParameters() throws IOException {
 		Tuple value;
-		value = (Tuple) receiver.receiveSpecialRecord();
+		value = (Tuple) receiver.receiveRecord();
 		while (value != null) {
 			switch (Parameters.valueOf(((String) value.getField(0)).toUpperCase())) {
 				case DOP:
 					env.setDegreeOfParallelism((Integer) value.getField(1));
 			}
-			value = (Tuple) receiver.receiveSpecialRecord();
+			value = (Tuple) receiver.receiveRecord();
 		}
 	}
 
@@ -264,7 +266,7 @@ public class PythonExecutor {
 
 	private static void receiveSources() throws IOException {
 		Object value;
-		while ((value = receiver.receiveSpecialRecord()) != null) {
+		while ((value = receiver.receiveRecord()) != null) {
 			String identifier = (String) value;
 			switch (InputFormats.valueOf(identifier.toUpperCase())) {
 				case CSV:
@@ -284,8 +286,8 @@ public class PythonExecutor {
 	}
 
 	private static void createCsvSource() throws IOException {
-		int id = (Integer) receiver.receiveSpecialRecord();
-		Tuple args = (Tuple) receiver.receiveSpecialRecord();
+		int id = (Integer) receiver.receiveRecord();
+		Tuple args = (Tuple) receiver.receiveRecord();
 		Tuple t = createTuple(args.getArity() - 1);
 		Class[] classes = new Class[t.getArity()];
 		for (int x = 0; x < args.getArity() - 1; x++) {
@@ -299,8 +301,8 @@ public class PythonExecutor {
 	}
 
 	private static void createJDBCSource() throws IOException {
-		int id = (Integer) receiver.receiveSpecialRecord();
-		Tuple args = (Tuple) receiver.receiveSpecialRecord();
+		int id = (Integer) receiver.receiveRecord();
+		Tuple args = (Tuple) receiver.receiveRecord();
 
 		DataSet<Tuple> set;
 		if (args.getArity() == 3) {
@@ -324,19 +326,19 @@ public class PythonExecutor {
 	}
 
 	private static void createTextSource() throws IOException {
-		int id = (Integer) receiver.receiveSpecialRecord();
-		Tuple args = (Tuple) receiver.receiveSpecialRecord();
+		int id = (Integer) receiver.receiveRecord();
+		Tuple args = (Tuple) receiver.receiveRecord();
 		Path path = new Path((String) args.getField(0));
 		DataSet<String> set = env.createInput(new TextInputFormat(path), STRING_TYPE_INFO);
 		sets.put(id, set);
 	}
 
 	private static void createValueSource() throws IOException {
-		int id = (Integer) receiver.receiveSpecialRecord();
-		int valueCount = (Integer) receiver.receiveSpecialRecord();
+		int id = (Integer) receiver.receiveRecord();
+		int valueCount = (Integer) receiver.receiveRecord();
 		Object[] values = new Object[valueCount];
 		for (int x = 0; x < valueCount; x++) {
-			values[x] = receiver.receiveSpecialRecord();
+			values[x] = receiver.receiveRecord();
 		}
 		sets.put(id, env.fromElements(values));
 	}
@@ -354,10 +356,10 @@ public class PythonExecutor {
 
 	private static void receiveSinks() throws IOException {
 		Object value;
-		while ((value = receiver.receiveSpecialRecord()) != null) {
+		while ((value = receiver.receiveRecord()) != null) {
 			int parentID = (Integer) value;
-			String identifier = (String) receiver.receiveSpecialRecord();
-			Tuple args = (Tuple) receiver.receiveSpecialRecord();
+			String identifier = (String) receiver.receiveRecord();
+			Tuple args = (Tuple) receiver.receiveRecord();
 			switch (OutputFormats.valueOf(identifier.toUpperCase())) {
 				case CSV:
 					createCsvSink(parentID, args);
@@ -496,62 +498,62 @@ public class PythonExecutor {
 
 		protected OperationInfo(int id, int mode) throws IOException {
 			parentID = id;
-			childID = (Integer) receiver.receiveSpecialRecord();
+			childID = (Integer) receiver.receiveRecord();
 			switch (mode) {
 				case INFO_MODE_FULL_PRJ:
-					keys1 = (Tuple) receiver.receiveSpecialRecord();
-					keys2 = (Tuple) receiver.receiveSpecialRecord();
-					otherID = (Integer) receiver.receiveSpecialRecord();
-					types = (Object) receiver.receiveSpecialRecord();
-					operator = (String) receiver.receiveSpecialRecord();
-					meta = (String) receiver.receiveSpecialRecord();
-					projectionKeys1 = (Tuple) receiver.receiveSpecialRecord();
-					projectionKeys2 = (Tuple) receiver.receiveSpecialRecord();
+					keys1 = (Tuple) receiver.receiveRecord();
+					keys2 = (Tuple) receiver.receiveRecord();
+					otherID = (Integer) receiver.receiveRecord();
+					types = (Object) receiver.receiveRecord();
+					operator = (String) receiver.receiveRecord();
+					meta = (String) receiver.receiveRecord();
+					projectionKeys1 = (Tuple) receiver.receiveRecord();
+					projectionKeys2 = (Tuple) receiver.receiveRecord();
 					break;
 				case INFO_MODE_NOKEY_PRJ:
-					otherID = (Integer) receiver.receiveSpecialRecord();
-					types = (Object) receiver.receiveSpecialRecord();
-					operator = (String) receiver.receiveSpecialRecord();
-					meta = (String) receiver.receiveSpecialRecord();
-					projectionKeys1 = (Tuple) receiver.receiveSpecialRecord();
-					projectionKeys2 = (Tuple) receiver.receiveSpecialRecord();
+					otherID = (Integer) receiver.receiveRecord();
+					types = (Object) receiver.receiveRecord();
+					operator = (String) receiver.receiveRecord();
+					meta = (String) receiver.receiveRecord();
+					projectionKeys1 = (Tuple) receiver.receiveRecord();
+					projectionKeys2 = (Tuple) receiver.receiveRecord();
 					break;
 				case INFO_MODE_FULL:
-					keys1 = (Tuple) receiver.receiveSpecialRecord();
-					keys2 = (Tuple) receiver.receiveSpecialRecord();
-					otherID = (Integer) receiver.receiveSpecialRecord();
-					types = (Object) receiver.receiveSpecialRecord();
-					operator = (String) receiver.receiveSpecialRecord();
-					meta = (String) receiver.receiveSpecialRecord();
+					keys1 = (Tuple) receiver.receiveRecord();
+					keys2 = (Tuple) receiver.receiveRecord();
+					otherID = (Integer) receiver.receiveRecord();
+					types = (Object) receiver.receiveRecord();
+					operator = (String) receiver.receiveRecord();
+					meta = (String) receiver.receiveRecord();
 					break;
 				case INFO_MODE_NOKEY:
-					otherID = (Integer) receiver.receiveSpecialRecord();
-					types = (Object) receiver.receiveSpecialRecord();
-					operator = (String) receiver.receiveSpecialRecord();
-					meta = (String) receiver.receiveSpecialRecord();
+					otherID = (Integer) receiver.receiveRecord();
+					types = (Object) receiver.receiveRecord();
+					operator = (String) receiver.receiveRecord();
+					meta = (String) receiver.receiveRecord();
 					break;
 				case INFO_MODE_OPTYPE:
-					types = (Object) receiver.receiveSpecialRecord();
-					operator = (String) receiver.receiveSpecialRecord();
-					meta = (String) receiver.receiveSpecialRecord();
+					types = (Object) receiver.receiveRecord();
+					operator = (String) receiver.receiveRecord();
+					meta = (String) receiver.receiveRecord();
 					break;
 				case INFO_MODE_OP:
-					operator = (String) receiver.receiveSpecialRecord();
-					meta = (String) receiver.receiveSpecialRecord();
+					operator = (String) receiver.receiveRecord();
+					meta = (String) receiver.receiveRecord();
 					break;
 				case INFO_MODE_GRP:
-					keys1 = (Tuple) receiver.receiveSpecialRecord();
+					keys1 = (Tuple) receiver.receiveRecord();
 					break;
 				case INFO_MODE_SORT:
-					field = (Integer) receiver.receiveSpecialRecord();
-					order = (Integer) receiver.receiveSpecialRecord();
+					field = (Integer) receiver.receiveRecord();
+					order = (Integer) receiver.receiveRecord();
 					break;
 				case INFO_MODE_UNION:
-					otherID = (Integer) receiver.receiveSpecialRecord();
+					otherID = (Integer) receiver.receiveRecord();
 					break;
 				case INFO_MODE_PROJECT:
-					keys1 = (Tuple) receiver.receiveSpecialRecord();
-					types = (Object) receiver.receiveSpecialRecord();
+					keys1 = (Tuple) receiver.receiveRecord();
+					types = (Object) receiver.receiveRecord();
 					break;
 			}
 		}
@@ -559,9 +561,9 @@ public class PythonExecutor {
 
 	private static void receiveSets() throws IOException {
 		Object value;
-		while ((value = receiver.receiveSpecialRecord()) != null) {
+		while ((value = receiver.receiveRecord()) != null) {
 			String identifier = (String) value;
-			int id = (Integer) receiver.receiveSpecialRecord();
+			int id = (Integer) receiver.receiveRecord();
 			switch (Operations.valueOf(identifier.toUpperCase())) {
 				case COGROUP:
 					createCoGroupOperation(new OperationInfo(id, INFO_MODE_FULL));
@@ -1387,10 +1389,10 @@ public class PythonExecutor {
 	//====BroadCastVariables============================================================================================
 	private static void receiveBroadcast() throws IOException {
 		Object value;
-		while ((value = receiver.receiveSpecialRecord()) != null) {
+		while ((value = receiver.receiveRecord()) != null) {
 			int parentID = (Integer) value;
-			int otherID = (Integer) receiver.receiveSpecialRecord();
-			String name = (String) receiver.receiveSpecialRecord();
+			int otherID = (Integer) receiver.receiveRecord();
+			String name = (String) receiver.receiveRecord();
 			DataSet op1 = (DataSet) sets.get(parentID);
 			DataSet op2 = (DataSet) sets.get(otherID);
 

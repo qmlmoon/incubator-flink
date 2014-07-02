@@ -21,9 +21,13 @@ class FlatMapFunction(Function.Function):
     def __init__(self):
         super(FlatMapFunction, self).__init__()
 
-    def function(self):
-        self.flat_map(self.iterator.next(), self.collector)
-        self.collector.send_signal(Iterator.ProtoIterator.ITERATOR_SIGNAL_DONE)
+    def run(self):
+        while True:
+            value = self.iterator.next()
+            if value is None:
+                break
+            self.flat_map(value, self.collector)
+            self.collector.finish()
 
     @abstractmethod
     def flat_map(self, value, collector):

@@ -21,17 +21,12 @@ from stratosphere.connection import Iterator
 class Function(object):
     __metaclass__ = ABCMeta
 
-    def __init__(self, mode=Iterator.ProtoIterator.ITERATOR_MODE_DEF):
-        self._mode = mode
+    def __init__(self):
         self.connection = Connection.STDPipeConnection()
-        self.iterator = Iterator.ProtoIterator(self.connection, self._mode)
-        self.collector = Collector.ProtoCollector(self.connection)
+        self.iterator = Iterator.RawIterator(self.connection)
+        self.collector = Collector.RawCollector(self.connection)
         self.context = RuntimeContext.RuntimeContext(self.iterator, self.collector)
 
-    def run(self):
-        while self.iterator.next():
-            self.function()
-
     @abstractmethod
-    def function(self):
+    def run(self):
         pass

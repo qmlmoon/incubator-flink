@@ -114,7 +114,7 @@ class Environment(object):
     def _send_parameters(self):
         if self._dop is not None:
             self._collector.collect(("dop", self._dop))
-        self._collector.send_signal(-1)
+        self._collector._send_end_signal()
 
     def _send_sources(self):
         for source in self._sources:
@@ -131,7 +131,7 @@ class Environment(object):
                 if case():
                     self._collector.collect(format._arguments)
                     break
-        self._collector.send_signal(-1)
+        self._collector._send_end_signal()
 
     def _send_sets(self):
         for set in self._sets:
@@ -192,7 +192,7 @@ class Environment(object):
                     break
                 if case():
                     raise KeyError("Environment._send_child_sets(): Invalid operation identifier: " + str(identifier))
-        self._collector.send_signal(-1)
+        self._collector._send_end_signal()
 
     def _send_sinks(self):
         for sink in self._sinks:
@@ -201,7 +201,7 @@ class Environment(object):
             self._collector.collect(set._id)
             self._collector.collect(format._identifier)
             self._collector.collect(format._arguments)
-        self._collector.send_signal(-1)
+        self._collector._send_end_signal()
 
     def _send_broadcast(self):
         for entry in self._broadcast:
@@ -211,7 +211,7 @@ class Environment(object):
             self._collector.collect(set._id)
             self._collector.collect(other._id)
             self._collector.collect(name)
-        self._collector.send_signal(-1)
+        self._collector._send_end_signal()
 
     def _full_prj(self, child):
         self._full(child)

@@ -13,8 +13,8 @@
 package eu.stratosphere.languagebinding.api.java.python.streaming;
 
 import eu.stratosphere.api.common.functions.AbstractFunction;
-import eu.stratosphere.languagebinding.api.java.proto.streaming.ProtoReceiver;
-import eu.stratosphere.languagebinding.api.java.proto.streaming.ProtoSender;
+import eu.stratosphere.languagebinding.api.java.proto.streaming.RawReceiver;
+import eu.stratosphere.languagebinding.api.java.proto.streaming.RawSender;
 import static eu.stratosphere.languagebinding.api.java.python.PythonExecutor.STRATOSPHERE_EXECUTOR_ID;
 import static eu.stratosphere.languagebinding.api.java.python.PythonExecutor.STRATOSPHERE_GOOGLE_ID;
 import static eu.stratosphere.languagebinding.api.java.python.PythonExecutor.STRATOSPHERE_PLAN_ID;
@@ -51,10 +51,10 @@ public class PythonStreamer extends Streamer {
 	private final String operator;
 	private AbstractFunction function;
 	private Process process;
+	private String metaInformation;
 	private Converter inConverter1;
 	private Converter inConverter2;
 	private Converter outConverter;
-	private String metaInformation;
 
 	public PythonStreamer(AbstractFunction function, String operator, String metaInformation) {
 		this.function = function;
@@ -118,12 +118,8 @@ public class PythonStreamer extends Streamer {
 			pb.command("python", executorPath, "0", operator, sb.toString());
 		}
 		process = pb.start();
-		sender = inConverter1 == null
-				? new ProtoSender(function, process.getOutputStream())
-				: new ProtoSender(function, process.getOutputStream(), new Converter[]{inConverter1, inConverter2});
-		receiver = outConverter == null
-				? new ProtoReceiver(function, process.getInputStream())
-				: new ProtoReceiver(function, process.getInputStream(), outConverter);
+		sender = new RawSender(function, process.getOutputStream());
+		receiver =  new RawReceiver(function, process.getInputStream());
 		//new StreamPrinter(process.getErrorStream()).start();
 	}
 

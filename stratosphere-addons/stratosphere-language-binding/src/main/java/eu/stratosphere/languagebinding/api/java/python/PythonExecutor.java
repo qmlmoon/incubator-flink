@@ -83,11 +83,9 @@ public class PythonExecutor {
 
 	public static String STRATOSPHERE_HDFS_PATH = LOCAL ? "/tmp/stratosphere" : "hdfs:/tmp/stratosphere";
 	public static String STRATOSPHERE_PYTHON_HDFS_PATH = STRATOSPHERE_HDFS_PATH + "/stratosphere";
-	public static String STRATOSPHERE_GOOGLE_HDFS_PATH = STRATOSPHERE_HDFS_PATH + "/stratosphere/google";
 	public static String STRATOSPHERE_EXECUTOR_HDFS_PATH = STRATOSPHERE_HDFS_PATH + "/stratosphere/executor.py";
 
 	public static final String STRATOSPHERE_PYTHON_ID = "stratosphere";
-	public static final String STRATOSPHERE_GOOGLE_ID = "google";
 	public static final String STRATOSPHERE_EXECUTOR_ID = "executor";
 	public static final String STRATOSPHERE_USER_ID = "userpackage";
 	public static final String STRATOSPHERE_PLAN_ID = "plan";
@@ -96,7 +94,6 @@ public class PythonExecutor {
 			? new File("src/main/python/eu/stratosphere/languagebinding/api/python").getAbsolutePath()
 			: "/resources/python";
 	public static String STRATOSPHERE_PYTHON_PATH_SUFFIX = STRATOSPHERE_PYTHON_PATH_PREFIX + "/stratosphere";
-	public static String STRATOSPHERE_GOOGLE_PATH_SUFFIX = STRATOSPHERE_PYTHON_PATH_PREFIX + "/google";
 	public static String STRATOSPHERE_EXECUTOR_PATH_SUFFIX = STRATOSPHERE_PYTHON_PATH_PREFIX + "/executor.py";
 
 	public static String STRATOSPHERE_DIR = LOCAL ? "" : System.getenv("STRATOSPHERE_ROOT_DIR");
@@ -157,9 +154,6 @@ public class PythonExecutor {
 				new Path(STRATOSPHERE_DIR + STRATOSPHERE_PYTHON_PATH_SUFFIX),
 				new Path(STRATOSPHERE_PYTHON_HDFS_PATH), false);
 		FileCache.copy(
-				new Path(STRATOSPHERE_DIR + STRATOSPHERE_GOOGLE_PATH_SUFFIX),
-				new Path(STRATOSPHERE_GOOGLE_HDFS_PATH), false);
-		FileCache.copy(
 				new Path(STRATOSPHERE_DIR + STRATOSPHERE_EXECUTOR_PATH_SUFFIX),
 				new Path(STRATOSPHERE_EXECUTOR_HDFS_PATH), false);
 		//copy user package to hdfs
@@ -171,7 +165,6 @@ public class PythonExecutor {
 
 		//register packages in distributed cache
 		env.registerCachedFile(STRATOSPHERE_PYTHON_HDFS_PATH, STRATOSPHERE_PYTHON_ID);
-		env.registerCachedFile(STRATOSPHERE_GOOGLE_HDFS_PATH, STRATOSPHERE_GOOGLE_ID);
 		env.registerCachedFile(STRATOSPHERE_EXECUTOR_HDFS_PATH, STRATOSPHERE_EXECUTOR_ID);
 		env.registerCachedFile(distributedPackagePath, STRATOSPHERE_USER_ID);
 		env.registerCachedFile(distributedPlanPath, STRATOSPHERE_PLAN_ID);
@@ -182,7 +175,6 @@ public class PythonExecutor {
 
 		Path[] paths = new Path[]{
 			new Path(STRATOSPHERE_PYTHON_HDFS_PATH),
-			new Path(STRATOSPHERE_GOOGLE_HDFS_PATH),
 			new Path(STRATOSPHERE_EXECUTOR_HDFS_PATH),
 			new Path(STRATOSPHERE_HDFS_PATH + packagePath.substring(packagePath.lastIndexOf("/"))),
 			new Path(STRATOSPHERE_HDFS_PATH + planPath.substring(planPath.lastIndexOf("/")))

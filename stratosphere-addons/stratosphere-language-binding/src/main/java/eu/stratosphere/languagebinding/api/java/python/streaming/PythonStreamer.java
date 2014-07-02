@@ -16,7 +16,6 @@ import eu.stratosphere.api.common.functions.AbstractFunction;
 import eu.stratosphere.languagebinding.api.java.proto.streaming.RawReceiver;
 import eu.stratosphere.languagebinding.api.java.proto.streaming.RawSender;
 import static eu.stratosphere.languagebinding.api.java.python.PythonExecutor.STRATOSPHERE_EXECUTOR_ID;
-import static eu.stratosphere.languagebinding.api.java.python.PythonExecutor.STRATOSPHERE_GOOGLE_ID;
 import static eu.stratosphere.languagebinding.api.java.python.PythonExecutor.STRATOSPHERE_PLAN_ID;
 import static eu.stratosphere.languagebinding.api.java.python.PythonExecutor.STRATOSPHERE_PYTHON_ID;
 import static eu.stratosphere.languagebinding.api.java.python.PythonExecutor.STRATOSPHERE_USER_ID;
@@ -94,8 +93,6 @@ public class PythonStreamer extends Streamer {
 				.getFile(STRATOSPHERE_PLAN_ID).getAbsolutePath();
 		function.getRuntimeContext().getDistributedCache()
 				.getFile(STRATOSPHERE_PYTHON_ID).getAbsolutePath();
-		function.getRuntimeContext().getDistributedCache()
-				.getFile(STRATOSPHERE_GOOGLE_ID).getAbsolutePath();
 		String executorPath = function.getRuntimeContext().getDistributedCache()
 				.getFile(STRATOSPHERE_EXECUTOR_ID).getAbsolutePath();
 

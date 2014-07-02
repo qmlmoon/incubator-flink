@@ -21,7 +21,6 @@ setup(
               'stratosphere.example',
               'stratosphere.functions',
               'stratosphere.plan',
-              'stratosphere.proto',
               'stratosphere.utilities'],
     url='stratosphere.eu',
     license='Licensed under the Apache License, Version 2.0',

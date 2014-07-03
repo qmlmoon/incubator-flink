@@ -22,7 +22,7 @@ class GroupReduceFunction(Function.Function):
         super(GroupReduceFunction, self).__init__()
 
     def run(self):
-        while self.iterator.next():
+        while self.iterator.next() is not None:
             self.group_reduce(self.iterator, self.collector)
             self.collector.finish()
             self.iterator._reset()

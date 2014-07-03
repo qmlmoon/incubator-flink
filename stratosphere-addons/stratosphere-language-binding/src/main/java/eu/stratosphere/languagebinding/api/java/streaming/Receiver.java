@@ -138,7 +138,7 @@ public abstract class Receiver extends Thread {
 			case 25:
 				return new Tuple25();
 			default:
-				throw new IllegalArgumentException("tuple size not supported.");
+				throw new IllegalArgumentException("Tuple size not supported: " + size);
 		}
 	}
 

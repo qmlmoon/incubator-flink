@@ -30,7 +30,7 @@ public class RawSender extends Sender {
 	public static final int SIGNAL_END = 64;
 
 	public static final int MASK_LAST = 32;
-	public static final int MASK_GROUP0 = 63;
+	public static final int MASK_GROUP0 = 0;
 	public static final int MASK_GROUP1 = 192;
 
 	public static final int TYPE_BOOLEAN = 128;
@@ -75,17 +75,13 @@ public class RawSender extends Sender {
 	public void sendRecord(Object value, int group, boolean isLast) throws IOException {
 		int meta = 0;
 
-		if (group == 0) {
-			meta &= MASK_GROUP0;
-		} else {
+		if (group == 1) {
 			meta |= MASK_GROUP1;
 		}
 
 		if (isLast) {
 			meta |= MASK_LAST;
 		}
-
-		outStream.write(meta);
 
 		if (classes[group] == null) {
 			extractClasses(value, group);
@@ -94,11 +90,13 @@ public class RawSender extends Sender {
 		if (value instanceof Tuple) {
 			meta |= ((Tuple) value).getArity();
 			outStream.write(meta);
+			outStream.flush();
 			for (int x = 0; x < ((Tuple) value).getArity(); x++) {
 				sendField(((Tuple) value).getField(x), x, group);
 			}
 		} else {
 			outStream.write(meta);
+			outStream.flush();
 			sendField(value, 0, group);
 		}
 	}
@@ -144,6 +142,7 @@ public class RawSender extends Sender {
 			case CHARACTER:
 				outStream.write(TYPE_STRING);
 				outStream.write(((Character) value + "").getBytes());
+				break;
 			case SHORT:
 				outStream.write(TYPE_SHORT);
 				buffer = new byte[2];
@@ -189,15 +188,18 @@ public class RawSender extends Sender {
 				outStream.write(TYPE_NULL);
 				break;
 		}
+		outStream.flush();
 	}
 
 	@Override
 	public void sendContinueSignal() throws IOException {
 		outStream.write(SIGNAL_CONT);
+		outStream.flush();
 	}
 
 	@Override
 	public void sendCompletionSignal() throws IOException {
 		outStream.write(SIGNAL_END);
+		outStream.flush();
 	}
 }

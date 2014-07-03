@@ -113,18 +113,8 @@ public abstract class Streamer {
 	 * @throws IOException 
 	 */
 	public void stream(Object record, Collector collector) throws IOException {
-		if (!receiver.isAlive()) {
-			receiver.start();
-		}
-		boolean done = false;
-		while (!done) {
-			try {
-				receiver.collectors.put(collector);
-				done = true;
-			} catch (InterruptedException ex) {
-			}
-		}
 		sender.sendRecord(record);
+		receiver.receiveRecords(collector);
 	}
 
 	/**
@@ -135,19 +125,11 @@ public abstract class Streamer {
 	 * @throws IOException 
 	 */
 	public void stream(Iterator iterator, Collector collector) throws IOException {
-		sender.sendContinueSignal();
-		if (!receiver.isAlive()) {
-			receiver.start();
+		if(iterator.hasNext()){
+			sender.sendContinueSignal();
+			sender.sendRecords(iterator);
+			receiver.receiveRecords(collector);
 		}
-		boolean done = false;
-		while (!done) {
-			try {
-				receiver.collectors.put(collector);
-				done = true;
-			} catch (InterruptedException ex) {
-			}
-		}
-		sender.sendRecords(iterator);
 	}
 
 	/**

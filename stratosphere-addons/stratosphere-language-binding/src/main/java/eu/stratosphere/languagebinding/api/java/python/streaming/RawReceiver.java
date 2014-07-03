@@ -14,6 +14,7 @@ package eu.stratosphere.languagebinding.api.java.python.streaming;
 
 import eu.stratosphere.api.common.functions.AbstractFunction;
 import eu.stratosphere.api.java.tuple.Tuple;
+import static eu.stratosphere.languagebinding.api.java.python.streaming.RawSender.SIGNAL_END;
 import static eu.stratosphere.languagebinding.api.java.python.streaming.RawSender.TYPE_BOOLEAN;
 import static eu.stratosphere.languagebinding.api.java.python.streaming.RawSender.TYPE_BYTE;
 import static eu.stratosphere.languagebinding.api.java.python.streaming.RawSender.TYPE_DOUBLE;
@@ -40,7 +41,7 @@ public class RawReceiver extends Receiver {
 	@Override
 	public Object receiveRecord() throws IOException {
 		int meta = inStream.read();
-		if (meta == 64) {
+		if (meta == SIGNAL_END) {
 			return null;
 		}
 		receivedLast = (meta & 32) == 32;
@@ -60,6 +61,7 @@ public class RawReceiver extends Receiver {
 		while (!receivedLast) {
 			collector.collect(receiveRecord());
 		}
+		receivedLast = false;
 	}
 
 	private Object receiveField(int index) throws IOException {

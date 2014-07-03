@@ -66,7 +66,6 @@ class RawIterator(Iterator):
     def next(self, group=0):
         if group == self.cache_mode & len(self.cache) > 0:
             return self.cache.popleft()
-
         raw_meta = "\x00\x00\x00" + self.connection.receive(1)
         meta = struct.unpack(">i", raw_meta)[0]
         if meta == 64:
@@ -74,26 +73,25 @@ class RawIterator(Iterator):
         if meta == 128:
             return True
         record_group = meta >> 7
-
         if record_group == group:
-            if (meta & 32 == 32):
+            if (meta & 32) == 32:
                 self.was_last0 = True
             size = meta & 31
             if size == 0:
                 return self._receive_field()
             result = ()
             for i in range(size):
-                result += self._receive_field()
+                result += (self._receive_field(),)
             return result
         else:
-            if (meta & 32 == 32):
+            if (meta & 32) == 32:
                 self.was_last1 = True
             size = meta & 31
             if size == 0:
                 return self._receive_field()
             result = ()
             for i in range(size):
-                result += self._receive_field()
+                result += (self._receive_field(),)
             if len(self.cache) == 0:
                 self.cache_mode = group
             self.cache.append(result)
@@ -144,9 +142,9 @@ class RawIterator(Iterator):
 
     def has_next(self, group=0):
         if group == 0:
-            return self.was_last0
+            return not self.was_last0
         else:
-            return self.was_last1
+            return not self.was_last1
 
     def _reset(self):
         self.was_last0 = False

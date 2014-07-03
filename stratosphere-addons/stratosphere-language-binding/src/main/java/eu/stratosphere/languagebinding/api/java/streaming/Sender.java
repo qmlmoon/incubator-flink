@@ -57,9 +57,8 @@ public abstract class Sender {
 
 	public void sendRecords(Iterator<Object> values) throws IOException {
 		while (values.hasNext()) {
-			sendRecord(values.next());
+			sendRecord(values.next(), 0, !values.hasNext());
 		}
-		sendCompletionSignal();
 	}
 
 	public void sendRecords(Iterator<Object> values1, Iterator<Object> values2) throws IOException {

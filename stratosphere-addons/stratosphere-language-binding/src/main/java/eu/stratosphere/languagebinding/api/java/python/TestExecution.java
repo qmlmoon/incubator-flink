@@ -25,6 +25,6 @@ public class TestExecution {
 		PythonExecutor.main(new String[]{
 			new File("src/main/python/eu/stratosphere/languagebinding/api/python/stratosphere/").getAbsolutePath(),
 			new File(
-			"src/main/python/eu/stratosphere/languagebinding/api/python/stratosphere/example/TriangleEnumeration.py").getAbsolutePath()});
+			"src/main/python/eu/stratosphere/languagebinding/api/python/stratosphere/example/WordCount.py").getAbsolutePath()});
 	}
 }

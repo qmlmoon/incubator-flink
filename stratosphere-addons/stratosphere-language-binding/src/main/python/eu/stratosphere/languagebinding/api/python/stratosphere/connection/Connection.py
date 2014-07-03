@@ -41,3 +41,7 @@ class STDPipeConnection(Connection):
 
     def receive(self, size):
         return sys.stdin.read(size)
+
+    def debug(self, msg):
+        sys.stderr.write(str(msg)+"\n")
+        sys.stderr.flush()

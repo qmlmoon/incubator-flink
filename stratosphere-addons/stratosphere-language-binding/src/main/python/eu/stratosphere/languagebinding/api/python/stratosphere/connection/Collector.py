@@ -47,13 +47,15 @@ class RawCollector(Collector):
         else:
             self._send_record(False)
             self.cache = value
-        pass
 
     def _send_end_signal(self):
-        self.connection.send(64)
+        signal = struct.pack(">i", 64)
+        self.connection.send(signal[3])
 
     def finish(self):
-        self._send_record(True)
+        if self.cache is not None:
+            self._send_record(True)
+            self.cache = None
 
     def _send_record(self, last):
         meta = 0
@@ -64,6 +66,9 @@ class RawCollector(Collector):
             self.connection.send(meta[3])
             self._send_field(self.cache)
         else:
+            meta += len(self.cache)
+            meta = struct.pack(">i", meta)
+            self.connection.send(meta[3])
             for field in self.cache:
                 self._send_field(field)
 
@@ -71,6 +76,8 @@ class RawCollector(Collector):
         if isinstance(value, basestring):
             type = struct.pack(">b", Constants.TYPE_STRING)
             self.connection.send(type)
+            size = struct.pack(">i", len(value))
+            self.connection.send(size)
             self.connection.send(value)
         elif isinstance(value, bool):
             type = struct.pack(">b", Constants.TYPE_BOOLEAN)
@@ -95,4 +102,6 @@ class RawCollector(Collector):
         else:
             type = struct.pack(">b", Constants.TYPE_STRING)
             self.connection.send(type)
+            size = struct.pack(">i", len(value))
+            self.connection.send(size)
             self.connection.send(str(value))

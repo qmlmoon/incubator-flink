@@ -16,6 +16,7 @@ from stratosphere.plan.DataSet import DataSet
 from stratosphere.plan.Constants import _Fields, _Operations
 from stratosphere.utilities.Switch import Switch
 from stratosphere.plan.InputFormat import InputIdentifier, CSVInputFormat, TextInputFormat, ValueInputFormat
+from stratosphere.plan.OutputFormat import OutputIdentifier
 
 
 def get_environment():
@@ -31,7 +32,7 @@ class Environment(object):
     def __init__(self):
         # util
         self._connection = Connection.STDPipeConnection()
-        self._collector = Collector.ProtoCollector(self._connection)
+        self._collector = Collector.RawCollector(self._connection)
         self._counter = 0
 
         #parameters
@@ -114,6 +115,7 @@ class Environment(object):
     def _send_parameters(self):
         if self._dop is not None:
             self._collector.collect(("dop", self._dop))
+        self._collector.finish()
         self._collector._send_end_signal()
 
     def _send_sources(self):
@@ -131,6 +133,7 @@ class Environment(object):
                 if case():
                     self._collector.collect(format._arguments)
                     break
+        self._collector.finish()
         self._collector._send_end_signal()
 
     def _send_sets(self):
@@ -192,15 +195,25 @@ class Environment(object):
                     break
                 if case():
                     raise KeyError("Environment._send_child_sets(): Invalid operation identifier: " + str(identifier))
+        self._collector.finish()
         self._collector._send_end_signal()
 
     def _send_sinks(self):
         for sink in self._sinks:
             format = sink[_Fields.FORMAT]
-            set = sink[_Fields.SET]
-            self._collector.collect(set._id)
-            self._collector.collect(format._identifier)
-            self._collector.collect(format._arguments)
+            for case in Switch(format._identifier):
+                if case(OutputIdentifier.PRINT):
+                    set = sink[_Fields.SET]
+                    self._collector.collect(set._id)
+                    self._collector.collect(format._identifier)
+                    break
+                if case():
+                    set = sink[_Fields.SET]
+                    self._collector.collect(set._id)
+                    self._collector.collect(format._identifier)
+                    self._collector.collect(format._arguments)
+                    break
+        self._collector.finish()
         self._collector._send_end_signal()
 
     def _send_broadcast(self):
@@ -211,6 +224,7 @@ class Environment(object):
             self._collector.collect(set._id)
             self._collector.collect(other._id)
             self._collector.collect(name)
+        self._collector.finish()
         self._collector._send_end_signal()
 
     def _full_prj(self, child):

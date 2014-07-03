@@ -79,7 +79,7 @@ public class PythonExecutor {
 	public static final double DOUBLE = 1.5D;
 	public static final boolean BOOLEAN = true;
 
-	private static final boolean LOCAL = false;
+	private static final boolean LOCAL = true;
 
 	public static String STRATOSPHERE_HDFS_PATH = LOCAL ? "/tmp/stratosphere" : "hdfs:/tmp/stratosphere";
 	public static String STRATOSPHERE_PYTHON_HDFS_PATH = STRATOSPHERE_HDFS_PATH + "/stratosphere";
@@ -175,6 +175,8 @@ public class PythonExecutor {
 
 		Path[] paths = new Path[]{
 			new Path(STRATOSPHERE_PYTHON_HDFS_PATH),
+			//new Path(STRATOSPHERE_PYTHON_PATH_PREFIX + packagePath.substring(packagePath.lastIndexOf("/"))),
+			new Path(STRATOSPHERE_PYTHON_PATH_PREFIX + planPath.substring(planPath.lastIndexOf("/"))),
 			new Path(STRATOSPHERE_EXECUTOR_HDFS_PATH),
 			new Path(STRATOSPHERE_HDFS_PATH + packagePath.substring(packagePath.lastIndexOf("/"))),
 			new Path(STRATOSPHERE_HDFS_PATH + planPath.substring(planPath.lastIndexOf("/")))
@@ -351,18 +353,21 @@ public class PythonExecutor {
 		while ((value = receiver.receiveRecord()) != null) {
 			int parentID = (Integer) value;
 			String identifier = (String) receiver.receiveRecord();
-			Tuple args = (Tuple) receiver.receiveRecord();
+			Tuple args;
 			switch (OutputFormats.valueOf(identifier.toUpperCase())) {
 				case CSV:
+					args = (Tuple) receiver.receiveRecord();
 					createCsvSink(parentID, args);
 					break;
 				case JDBC:
+					args = (Tuple) receiver.receiveRecord();
 					createJDBCSink(parentID, args);
 					break;
 				case PRINT:
 					createPrintSink(parentID);
 					break;
 				case TEXT:
+					args = (Tuple) receiver.receiveRecord();
 					createTextSink(parentID, args);
 					break;
 			}

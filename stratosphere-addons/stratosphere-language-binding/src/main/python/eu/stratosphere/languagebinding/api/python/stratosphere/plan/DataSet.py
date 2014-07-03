@@ -510,8 +510,10 @@ class JoinOperatorWhere(object):
     def __init__(self, ref, dic):
         self._ref = ref
         self._dic = dic
-        self._dic[_Fields.OPERATOR] = []
-        self._dic[_Fields.META] = []
+        self._dic[_Fields.OPERATOR] = None
+        self._dic[_Fields.META] = None
+        self._dic[_Fields.PKEY1] = None
+        self._dic[_Fields.PKEY2] = None
 
     def where(self, *fields):
         """
@@ -551,8 +553,6 @@ class JoinOperatorUsing(object):
     def __init__(self, ref, dic):
         self._ref = ref
         self._dic = dic
-        self._dic[_Fields.PKEY1] = []
-        self._dic[_Fields.PKEY2] = []
 
     def project_first(self, *fields):
         """

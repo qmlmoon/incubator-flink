@@ -100,36 +100,35 @@ class RawIterator(Iterator):
     def _receive_field(self):
         raw_type = "\x00\x00\x00" + self.connection.receive(1)
         type = struct.unpack(">i", raw_type)[0]
-        for case in Switch(type):
-            if case(Constants.TYPE_BOOLEAN):
-                raw_bool = self.connection.receive(1)
-                return struct.unpack(">?", raw_bool)[0]
-            if case(Constants.TYPE_BYTE):
-                raw_byte = self.connection.receive(1)
-                return struct.unpack(">c", raw_byte)[0]
-            if case(Constants.TYPE_FLOAT):
-                raw_float = self.connection.receive(4)
-                return struct.unpack(">f", raw_float)[0]
-            if case(Constants.TYPE_DOUBLE):
-                raw_double = self.connection.receive(8)
-                return struct.unpack(">d", raw_double)[0]
-            if case(Constants.TYPE_SHORT):
-                raw_short = self.connection.receive(2)
-                return struct.unpack(">h", raw_short)[0]
-            if case(Constants.TYPE_INTEGER):
-                raw_int = self.connection.receive(4)
-                return struct.unpack(">i", raw_int)[0]
-            if case(Constants.TYPE_LONG):
-                raw_long = self.connection.receive(8)
-                return struct.unpack(">l", raw_long)[0]
-            if case(Constants.TYPE_STRING):
-                raw_size = self.connection.receive(4)
-                size = struct.unpack(">i", raw_size)[0]
-                if size == 0:
-                    return ""
-                return self.connection.receive(size)
-            if case(Constants.TYPE_NULL):
-                return None
+        if (type==Constants.TYPE_BOOLEAN):
+            raw_bool = self.connection.receive(1)
+            return struct.unpack(">?", raw_bool)[0]
+        elif (type==Constants.TYPE_BYTE):
+            raw_byte = self.connection.receive(1)
+            return struct.unpack(">c", raw_byte)[0]
+        elif (type==Constants.TYPE_FLOAT):
+            raw_float = self.connection.receive(4)
+            return struct.unpack(">f", raw_float)[0]
+        elif (type==Constants.TYPE_DOUBLE):
+            raw_double = self.connection.receive(8)
+            return struct.unpack(">d", raw_double)[0]
+        elif (type==Constants.TYPE_SHORT):
+            raw_short = self.connection.receive(2)
+            return struct.unpack(">h", raw_short)[0]
+        elif (type==Constants.TYPE_INTEGER):
+            raw_int = self.connection.receive(4)
+            return struct.unpack(">i", raw_int)[0]
+        elif (type==Constants.TYPE_LONG):
+            raw_long = self.connection.receive(8)
+            return struct.unpack(">l", raw_long)[0]
+        elif (type==Constants.TYPE_STRING):
+            raw_size = self.connection.receive(4)
+            size = struct.unpack(">i", raw_size)[0]
+            if size == 0:
+                return ""
+            return self.connection.receive(size)
+        elif (type==Constants.TYPE_NULL):
+            return None
 
     def all(self, group=0):
         values = []

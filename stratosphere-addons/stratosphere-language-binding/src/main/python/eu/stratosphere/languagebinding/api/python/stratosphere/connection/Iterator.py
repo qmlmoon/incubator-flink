@@ -64,7 +64,7 @@ class RawIterator(Iterator):
         self.was_last1 = False
 
     def next(self, group=0):
-        if group == self.cache_mode & len(self.cache) > 0:
+        if len(self.cache) > 0 & group == self.cache_mode:
             return self.cache.popleft()
         raw_meta = "\x00\x00\x00" + self.connection.receive(1)
         meta = struct.unpack(">i", raw_meta)[0]

@@ -39,11 +39,13 @@ class Collector(object):
 class RawCollector(Collector):
     def __init__(self, con):
         super(RawCollector, self).__init__(con)
+        self.init = True
         self.cache = None
 
     def collect(self, value):
-        if self.cache is None:
+        if self.init:
             self.cache = value
+            self.init = False
         else:
             self._send_record(False)
             self.cache = value
@@ -53,9 +55,9 @@ class RawCollector(Collector):
         self.connection.send(signal[3])
 
     def finish(self):
-        if self.cache is not None:
+        if not self.init:
             self._send_record(True)
-            self.cache = None
+            self.init = True
 
     def _send_record(self, last):
         meta = 0
@@ -73,7 +75,10 @@ class RawCollector(Collector):
                 self._send_field(field)
 
     def _send_field(self, value):
-        if isinstance(value, basestring):
+        if value is None:
+            type = struct.pack(">b", Constants.TYPE_NULL)
+            self.connection.send(type)
+        elif isinstance(value, basestring):
             type = struct.pack(">b", Constants.TYPE_STRING)
             self.connection.send(type)
             size = struct.pack(">i", len(value))

@@ -79,7 +79,7 @@ public class PythonExecutor {
 	public static final double DOUBLE = 1.5D;
 	public static final boolean BOOLEAN = true;
 
-	private static final boolean LOCAL = true;
+	private static final boolean LOCAL = false;
 
 	public static String STRATOSPHERE_HDFS_PATH = LOCAL ? "/tmp/stratosphere" : "hdfs:/tmp/stratosphere";
 	public static String STRATOSPHERE_PYTHON_HDFS_PATH = STRATOSPHERE_HDFS_PATH + "/stratosphere";

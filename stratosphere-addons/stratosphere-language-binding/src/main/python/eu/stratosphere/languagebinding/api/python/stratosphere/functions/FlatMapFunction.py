@@ -22,7 +22,7 @@ class FlatMapFunction(Function.Function):
         super(FlatMapFunction, self).__init__()
 
     def run(self):
-        while True:
+        while 1:
             value = self.iterator.next()
             if value is None:
                 break

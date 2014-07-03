@@ -88,14 +88,15 @@ class RawIterator(Iterator):
                 self.was_last1 = True
             size = meta & 31
             if size == 0:
-                return self._receive_field()
-            result = ()
-            for i in range(size):
-                result += (self._receive_field(),)
-            if len(self.cache) == 0:
-                self.cache_mode = group
-            self.cache.append(result)
-        return self.next(group)
+                self.cache.append(self._receive_field())
+            else:
+                result = ()
+                for i in range(size):
+                    result += (self._receive_field(),)
+                if len(self.cache) == 0:
+                    self.cache_mode = group
+                self.cache.append(result)
+            return self.next(group)
 
     def _receive_field(self):
         raw_type = "\x00\x00\x00" + self.connection.receive(1)

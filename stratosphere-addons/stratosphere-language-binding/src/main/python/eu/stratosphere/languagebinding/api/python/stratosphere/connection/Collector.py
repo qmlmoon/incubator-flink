@@ -58,6 +58,8 @@ class RawCollector(Collector):
         if not self.init:
             self._send_record(True)
             self.init = True
+        else:
+            self._send_end_signal()
 
     def _send_record(self, last):
         meta = 0

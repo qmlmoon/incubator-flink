@@ -115,10 +115,12 @@ class Environment(object):
     def _send_parameters(self):
         if self._dop is not None:
             self._collector.collect(("dop", self._dop))
+        else:
+            self._collector.collect(("dop", 0))
         self._collector.finish()
-        self._collector._send_end_signal()
 
     def _send_sources(self):
+        self._collector.collect(len(self._sources))
         for source in self._sources:
             format = source[_Fields.FORMAT]
             set = source[_Fields.CHILD]
@@ -134,9 +136,9 @@ class Environment(object):
                     self._collector.collect(format._arguments)
                     break
         self._collector.finish()
-        self._collector._send_end_signal()
 
     def _send_sets(self):
+        self._collector.collect(len(self._sets))
         for set in self._sets:
             identifier = set.get(_Fields.IDENTIFIER)
             self._collector.collect(set[_Fields.IDENTIFIER])
@@ -196,9 +198,9 @@ class Environment(object):
                 if case():
                     raise KeyError("Environment._send_child_sets(): Invalid operation identifier: " + str(identifier))
         self._collector.finish()
-        self._collector._send_end_signal()
 
     def _send_sinks(self):
+        self._collector.collect(len(self._sinks))
         for sink in self._sinks:
             format = sink[_Fields.FORMAT]
             for case in Switch(format._identifier):
@@ -214,9 +216,9 @@ class Environment(object):
                     self._collector.collect(format._arguments)
                     break
         self._collector.finish()
-        self._collector._send_end_signal()
 
     def _send_broadcast(self):
+        self._collector.collect(len(self._broadcast))
         for entry in self._broadcast:
             set = entry[_Fields.SET]
             other = entry[_Fields.OTHER]
@@ -225,7 +227,6 @@ class Environment(object):
             self._collector.collect(other._id)
             self._collector.collect(name)
         self._collector.finish()
-        self._collector._send_end_signal()
 
     def _full_prj(self, child):
         self._full(child)

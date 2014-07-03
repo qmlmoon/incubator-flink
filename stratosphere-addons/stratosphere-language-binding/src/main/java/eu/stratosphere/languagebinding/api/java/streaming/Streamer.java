@@ -20,19 +20,8 @@ import java.util.Iterator;
  * General purpose class to stream data between two processes with 1 input/output types.
  */
 public abstract class Streamer {
-
 	protected Sender sender;
 	protected Receiver receiver;
-
-	public static class Sentinel implements Collector {
-		@Override
-		public void collect(Object record) {
-		}
-
-		@Override
-		public void close() {
-		}
-	}
 
 	public abstract void open() throws IOException;
 
@@ -42,24 +31,6 @@ public abstract class Streamer {
 	 */
 	public void close() throws IOException {
 		sender.sendCompletionSignal();
-		if (receiver.isAlive()) {
-			boolean done = false;
-			while (!done) {
-				try {
-					receiver.collectors.put(new Sentinel());
-					done = true;
-				} catch (InterruptedException ex) {
-				}
-			}
-			boolean joined = false;
-			while (!joined) {
-				try {
-					receiver.join();
-					joined = true;
-				} catch (InterruptedException ex) {
-				}
-			}
-		}
 		sender.close();
 		receiver.close();
 	}
@@ -141,18 +112,14 @@ public abstract class Streamer {
 	 * @throws IOException
 	 */
 	public void stream(Iterator iterator1, Iterator iterator2, Collector collector) throws IOException {
-		sender.sendContinueSignal();
-		if (!receiver.isAlive()) {
-			receiver.start();
-		}
-		boolean done = false;
-		while (!done) {
-			try {
-				receiver.collectors.put(collector);
-				done = true;
-			} catch (InterruptedException ex) {
+		while(iterator1.hasNext()||iterator2.hasNext()){
+			if(iterator1.hasNext()){
+				sender.sendRecord(iterator1.next(), 0, iterator1.hasNext());
+			}
+			if(iterator2.hasNext()){
+				sender.sendRecord(iterator2.next(), 1, iterator2.hasNext());
 			}
 		}
-		sender.sendRecords(iterator1, iterator2);
+		receiver.receiveRecords(collector);
 	}
 }

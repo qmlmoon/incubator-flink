@@ -40,12 +40,12 @@ import static eu.stratosphere.api.java.typeutils.BasicTypeInfo.STRING_TYPE_INFO;
 import static eu.stratosphere.api.java.typeutils.TypeExtractor.getForObject;
 import eu.stratosphere.core.fs.FileSystem;
 import eu.stratosphere.core.fs.Path;
-import eu.stratosphere.languagebinding.api.java.python.streaming.RawReceiver;
-import eu.stratosphere.languagebinding.api.java.python.streaming.RawSender;
 //CHECKSTYLE.OFF: AvoidStarImport - enum/function import
 import static eu.stratosphere.languagebinding.api.java.python.PythonExecutor.OperationInfo.*;
 import eu.stratosphere.languagebinding.api.java.python.functions.*;
 //CHECKSTYLE.ON: AvoidStarImport
+import eu.stratosphere.languagebinding.api.java.python.streaming.RawReceiver;
+import eu.stratosphere.languagebinding.api.java.python.streaming.RawSender;
 import eu.stratosphere.languagebinding.api.java.streaming.Receiver;
 import static eu.stratosphere.languagebinding.api.java.streaming.Receiver.createTuple;
 import eu.stratosphere.languagebinding.api.java.streaming.Sender;
@@ -236,14 +236,13 @@ public class PythonExecutor {
 	}
 
 	private static void receiveParameters() throws IOException {
-		Tuple value;
-		value = (Tuple) receiver.receiveRecord();
-		while (value != null) {
-			switch (Parameters.valueOf(((String) value.getField(0)).toUpperCase())) {
-				case DOP:
-					env.setDegreeOfParallelism((Integer) value.getField(1));
-			}
-			value = (Tuple) receiver.receiveRecord();
+		Tuple value = (Tuple) receiver.receiveRecord();
+		switch (Parameters.valueOf(((String) value.getField(0)).toUpperCase())) {
+			case DOP:
+				Integer dop = (Integer) value.getField(1);
+				if (dop > 0) {
+					env.setDegreeOfParallelism(dop);
+				}
 		}
 	}
 
@@ -259,9 +258,9 @@ public class PythonExecutor {
 	}
 
 	private static void receiveSources() throws IOException {
-		Object value;
-		while ((value = receiver.receiveRecord()) != null) {
-			String identifier = (String) value;
+		Integer sourceCount = (Integer) receiver.receiveRecord();
+		for (int x = 0; x < sourceCount; x++) {
+			String identifier = (String) receiver.receiveRecord();
 			switch (InputFormats.valueOf(identifier.toUpperCase())) {
 				case CSV:
 					createCsvSource();
@@ -349,9 +348,9 @@ public class PythonExecutor {
 	}
 
 	private static void receiveSinks() throws IOException {
-		Object value;
-		while ((value = receiver.receiveRecord()) != null) {
-			int parentID = (Integer) value;
+		Integer sinkCount = (Integer) receiver.receiveRecord();
+		for (int x = 0; x < sinkCount; x++) {
+			int parentID = (Integer) receiver.receiveRecord();
 			String identifier = (String) receiver.receiveRecord();
 			Tuple args;
 			switch (OutputFormats.valueOf(identifier.toUpperCase())) {
@@ -557,9 +556,9 @@ public class PythonExecutor {
 	}
 
 	private static void receiveSets() throws IOException {
-		Object value;
-		while ((value = receiver.receiveRecord()) != null) {
-			String identifier = (String) value;
+		Integer setCount = (Integer) receiver.receiveRecord();
+		for (int x = 0; x < setCount; x++) {
+			String identifier = (String) receiver.receiveRecord();
 			int id = (Integer) receiver.receiveRecord();
 			switch (Operations.valueOf(identifier.toUpperCase())) {
 				case COGROUP:
@@ -1385,9 +1384,9 @@ public class PythonExecutor {
 
 	//====BroadCastVariables============================================================================================
 	private static void receiveBroadcast() throws IOException {
-		Object value;
-		while ((value = receiver.receiveRecord()) != null) {
-			int parentID = (Integer) value;
+		Integer broadcastCount = (Integer) receiver.receiveRecord();
+		for (int x = 0; x < broadcastCount; x++) {
+			int parentID = (Integer) receiver.receiveRecord();
 			int otherID = (Integer) receiver.receiveRecord();
 			String name = (String) receiver.receiveRecord();
 			DataSet op1 = (DataSet) sets.get(parentID);
@@ -1395,11 +1394,8 @@ public class PythonExecutor {
 
 			if (op1 instanceof SingleInputUdfOperator) {
 				((SingleInputUdfOperator) op1).withBroadcastSet(op2, name);
-				return;
-			}
-			if (op1 instanceof TwoInputUdfOperator) {
+			} else if (op1 instanceof TwoInputUdfOperator) {
 				((TwoInputUdfOperator) op1).withBroadcastSet(op2, name);
-				return;
 			}
 		}
 	}

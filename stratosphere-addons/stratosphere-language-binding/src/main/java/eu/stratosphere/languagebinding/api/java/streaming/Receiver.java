@@ -15,45 +15,18 @@ package eu.stratosphere.languagebinding.api.java.streaming;
 //CHECKSTYLE.OFF: AvoidStarImport - tuple imports
 import eu.stratosphere.api.java.tuple.*;
 //CHECKSTYLE.ON: AvoidStarImport
-import eu.stratosphere.languagebinding.api.java.streaming.Streamer.Sentinel;
 import eu.stratosphere.util.Collector;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.SynchronousQueue;
 
 /**
  * General purpose class to receive data via input streams.
  */
 public abstract class Receiver extends Thread {
 	public final InputStream inStream;
-	public BlockingQueue<Collector<Object>> collectors = new SynchronousQueue();
 
 	public Receiver(InputStream inStream) {
 		this.inStream = inStream;
-	}
-
-	@Override
-	public void run() {
-		try {
-			Collector c;
-			boolean done = false;
-			while (!done) {
-				try {
-					while (!((c = collectors.take()) instanceof Sentinel)) {
-						receiveRecords(c);
-					}
-					done = true;
-				} catch (InterruptedException ex) {
-				}
-			}
-		} catch (IOException ioe) {
-			if (ioe.getMessage().startsWith("Stream closed")) {
-				System.out.println(
-						"The python process has prematurely terminated (or may have never started).");
-			}
-			throw new RuntimeException(ioe);
-		}
 	}
 
 	/**

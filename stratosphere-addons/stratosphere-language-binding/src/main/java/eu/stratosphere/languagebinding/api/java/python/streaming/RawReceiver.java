@@ -38,11 +38,14 @@ public class RawReceiver extends Receiver {
 		this.function = function;
 	}
 
+	public class Sentinel {
+	}
+
 	@Override
 	public Object receiveRecord() throws IOException {
 		int meta = inStream.read();
 		if (meta == SIGNAL_END) {
-			return null;
+			return new Sentinel();
 		}
 		receivedLast = (meta & 32) == 32;
 		int size = meta & 31;
@@ -58,10 +61,17 @@ public class RawReceiver extends Receiver {
 
 	@Override
 	public void receiveRecords(Collector collector) throws IOException {
-		while (!receivedLast) {
-			collector.collect(receiveRecord());
+		Object value = receiveRecord();
+		if (!(value instanceof Sentinel)) {
+			collector.collect(value);
+			while (!receivedLast) {
+				collector.collect(receiveRecord());
+			}
+			receivedLast = false;
+		} else {
+			receivedLast = true;
 		}
-		receivedLast = false;
+
 	}
 
 	private Object receiveField(int index) throws IOException {

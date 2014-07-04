@@ -82,7 +82,11 @@ class RawCollector(Collector):
             self.connection.send(type)
         elif isinstance(value, basestring):
             type = struct.pack(">B", Constants.TYPE_STRING)
-            size = struct.pack(">i", len(value))
+            if isinstance(value, unicode):
+                size = struct.pack(">I", len(value.encode('utf-8')))
+                value = value.encode("utf-8")
+            else:
+                size = struct.pack(">I", len(value))
             self.connection.send("".join([type, size, value]))
         elif isinstance(value, bool):
             type = struct.pack(">B", Constants.TYPE_BOOLEAN)
@@ -102,5 +106,5 @@ class RawCollector(Collector):
             self.connection.send("".join([type, data]))
         else:
             type = struct.pack(">B", Constants.TYPE_STRING)
-            size = struct.pack(">i", len(str(value)))
+            size = struct.pack(">I", len(str(value)))
             self.connection.send("".join([type, size, str(value)]))

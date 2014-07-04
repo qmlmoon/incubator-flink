@@ -21,9 +21,10 @@ from stratosphere.plan.OutputFormat import WriteMode
 
 class Tokenizer(FlatMapFunction):
     def flat_map(self, value, collector):
-        words = re.split("\W+", value.lower())
-        for word in words:
-            collector.collect((1, word))
+        if len(value) > 0:
+            words = re.split("\W+", value.lower())
+            for word in words:
+                collector.collect((1, word))
 
 
 class Adder(GroupReduceFunction):

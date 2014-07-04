@@ -88,7 +88,6 @@ public class RawSender extends Sender {
 		}
 
 		if (value instanceof Tuple) {
-			System.out.println("sendint tuple");
 			meta |= ((Tuple) value).getArity();
 			outStream.write(meta);
 			outStream.flush();
@@ -165,7 +164,7 @@ public class RawSender extends Sender {
 			case STRING:
 				outStream.write(TYPE_STRING);
 				buffer = new byte[4];
-				ByteBuffer.wrap(buffer).putInt(((String) value).length());
+				ByteBuffer.wrap(buffer).putInt(((String) value).getBytes().length);
 				outStream.write(buffer);
 				outStream.write(((String) value).getBytes());
 				break;

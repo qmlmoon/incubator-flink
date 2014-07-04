@@ -47,6 +47,7 @@ public class RawReceiver extends Receiver {
 		if (meta == SIGNAL_END) {
 			return new Sentinel();
 		}
+		try{
 		receivedLast = (meta & 32) == 32;
 		int size = meta & 31;
 		if (size > 0) {
@@ -56,7 +57,9 @@ public class RawReceiver extends Receiver {
 			}
 			return tuple;
 		}
-		return receiveField(0);
+		return receiveField(0);}catch(IllegalArgumentException iae){
+			throw new IllegalArgumentException(iae.getMessage() + "meta = "+meta,iae);
+		}
 	}
 
 	@Override

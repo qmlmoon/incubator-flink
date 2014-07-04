@@ -45,9 +45,9 @@ if __name__ == "__main__":
 
     data \
         .flatmap(Tokenizer(), (Types.INT, Types.STRING)) \
-        .group_by(1) \
-        .groupreduce(Adder(), (Types.INT, Types.STRING)) \
         .write_csv("hdfs:/tmp/python/output/", WriteMode.OVERWRITE)
+        #.group_by(1) \
+        #.groupreduce(Adder(), (Types.INT, Types.STRING)) \
 
     env.set_degree_of_parallelism(208)
 

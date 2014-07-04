@@ -88,6 +88,7 @@ public class RawSender extends Sender {
 		}
 
 		if (value instanceof Tuple) {
+			System.out.println("sendint tuple");
 			meta |= ((Tuple) value).getArity();
 			outStream.write(meta);
 			outStream.flush();

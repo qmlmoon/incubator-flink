@@ -102,5 +102,5 @@ class RawCollector(Collector):
             self.connection.send("".join([type, data]))
         else:
             type = struct.pack(">B", Constants.TYPE_STRING)
-            size = struct.pack(">i", len(value))
-            self.connection.send("".join([type, size, value]))
+            size = struct.pack(">i", len(str(value)))
+            self.connection.send("".join([type, size, str(value)]))

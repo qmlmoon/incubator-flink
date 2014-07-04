@@ -69,13 +69,20 @@ class RawIterator(Iterator):
         raw_meta = "\x00\x00\x00" + self.connection.receive(1)
         meta = struct.unpack(">i", raw_meta)[0]
         if meta == 64:
+            if group==0:
+                self.was_last0 = True
+            else:
+                self.was_last1 = True
             return None
         if meta == 128:
             return True
         record_group = meta >> 7
         if record_group == group:
             if (meta & 32) == 32:
-                self.was_last0 = True
+                if group == 0:
+                    self.was_last0 = True
+                else:
+                    self.was_last1 = True
             size = meta & 31
             if size == 0:
                 return self._receive_field()
@@ -85,7 +92,10 @@ class RawIterator(Iterator):
             return result
         else:
             if (meta & 32) == 32:
-                self.was_last1 = True
+                if group == 0:
+                    self.was_last0 = True
+                else:
+                    self.was_last1 = True
             size = meta & 31
             if size == 0:
                 self.cache.append(self._receive_field())
@@ -165,3 +175,6 @@ class Dummy(Iterator):
 
     def all(self):
         return self.iterator.all(self.group)
+
+    def _reset(self):
+        self.iterator._reset()

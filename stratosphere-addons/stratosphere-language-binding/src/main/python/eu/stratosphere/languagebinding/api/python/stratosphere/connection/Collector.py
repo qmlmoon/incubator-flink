@@ -78,29 +78,29 @@ class RawCollector(Collector):
 
     def _send_field(self, value):
         if value is None:
-            type = struct.pack(">b", Constants.TYPE_NULL)
+            type = struct.pack(">B", Constants.TYPE_NULL)
             self.connection.send(type)
         elif isinstance(value, basestring):
-            type = struct.pack(">b", Constants.TYPE_STRING)
+            type = struct.pack(">B", Constants.TYPE_STRING)
             size = struct.pack(">i", len(value))
             self.connection.send("".join([type, size, value]))
         elif isinstance(value, bool):
-            type = struct.pack(">b", Constants.TYPE_BOOLEAN)
+            type = struct.pack(">B", Constants.TYPE_BOOLEAN)
             data = struct.pack(">?", value)
             self.connection.send("".join([type, data]))
         elif isinstance(value, int):
-            type = struct.pack(">b", Constants.TYPE_INTEGER)
+            type = struct.pack(">B", Constants.TYPE_INTEGER)
             data = struct.pack(">i", value)
             self.connection.send("".join([type, data]))
         elif isinstance(value, long):
-            type = struct.pack(">b", Constants.TYPE_LONG)
+            type = struct.pack(">B", Constants.TYPE_LONG)
             data = struct.pack(">l", value)
             self.connection.send("".join([type, data]))
         elif isinstance(value, float):
-            type = struct.pack(">b", Constants.TYPE_DOUBLE)
+            type = struct.pack(">B", Constants.TYPE_DOUBLE)
             data = struct.pack(">d", value)
             self.connection.send("".join([type, data]))
         else:
-            type = struct.pack(">b", Constants.TYPE_STRING)
+            type = struct.pack(">B", Constants.TYPE_STRING)
             size = struct.pack(">i", len(value))
             self.connection.send("".join([type, size, value]))

@@ -182,6 +182,8 @@ public class RawSender extends Sender {
 				break;
 			case OTHER:
 				outStream.write(TYPE_STRING);
+				buffer = new byte[4];
+				ByteBuffer.wrap(buffer).putInt(value.toString().getBytes().length);
 				outStream.write(value.toString().getBytes());
 				break;
 			case NULL:

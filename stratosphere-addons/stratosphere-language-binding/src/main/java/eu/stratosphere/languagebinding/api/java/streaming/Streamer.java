@@ -71,8 +71,8 @@ public abstract class Streamer {
 	 * @throws IOException
 	 */
 	public Object streamWithGroups(Object record1, Object record2) throws IOException {
-		sender.sendRecord(record1);
-		sender.sendRecord(record2);
+		sender.sendRecord(record1, 0, false);
+		sender.sendRecord(record2, 1, false);
 		return receiver.receiveRecord();
 	}
 
@@ -96,7 +96,7 @@ public abstract class Streamer {
 	 * @throws IOException 
 	 */
 	public void stream(Iterator iterator, Collector collector) throws IOException {
-		if(iterator.hasNext()){
+		if (iterator.hasNext()) {
 			sender.sendContinueSignal();
 			sender.sendRecords(iterator);
 			receiver.receiveRecords(collector);
@@ -112,12 +112,23 @@ public abstract class Streamer {
 	 * @throws IOException
 	 */
 	public void stream(Iterator iterator1, Iterator iterator2, Collector collector) throws IOException {
-		while(iterator1.hasNext()||iterator2.hasNext()){
-			if(iterator1.hasNext()){
-				sender.sendRecord(iterator1.next(), 0, iterator1.hasNext());
+		sender.sendContinueSignal();
+		if (iterator1.hasNext()) {
+			sender.sendContinueSignal();
+		} else {
+			sender.sendCompletionSignal();
+		}
+		if (iterator2.hasNext()) {
+			sender.sendContinueSignal();
+		} else {
+			sender.sendCompletionSignal();
+		}
+		while (iterator1.hasNext() || iterator2.hasNext()) {
+			if (iterator1.hasNext()) {
+				sender.sendRecord(iterator1.next(), 0, !iterator1.hasNext());
 			}
-			if(iterator2.hasNext()){
-				sender.sendRecord(iterator2.next(), 1, iterator2.hasNext());
+			if (iterator2.hasNext()) {
+				sender.sendRecord(iterator2.next(), 1, !iterator2.hasNext());
 			}
 		}
 		receiver.receiveRecords(collector);

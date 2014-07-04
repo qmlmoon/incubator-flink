@@ -25,7 +25,9 @@ class CoGroupFunction(Function.Function):
         self.dummy2 = Iterator.Dummy(self.iterator, 1)
 
     def run(self):
-        while self.iterator.next():
+        while self.iterator.next() is not None:
+            sig1 = self.dummy1.next()
+            sig2 = self.dummy2.next()
             self.co_group(self.dummy1, self.dummy2, self.collector)
             self.collector.finish()
             self.iterator._reset()

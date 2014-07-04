@@ -13,7 +13,7 @@
 
 
 class Constants(object):
-    TYPE_BOOLEAN = -63
+    TYPE_BOOLEAN = 128
     TYPE_BYTE = 64
     TYPE_SHORT = 32
     TYPE_INTEGER = 16

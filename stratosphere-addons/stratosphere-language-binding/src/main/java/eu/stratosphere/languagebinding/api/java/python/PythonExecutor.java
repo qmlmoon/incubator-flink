@@ -125,7 +125,11 @@ public class PythonExecutor {
 
 	private static void open(String[] args) throws IOException {
 		sets = new HashMap();
-		process = Runtime.getRuntime().exec("python " + tmpPlanPath, args);
+		StringBuilder argsBuilder = new StringBuilder();
+		for(String arg : args) {
+			argsBuilder.append(" " + arg);
+		}
+		process = Runtime.getRuntime().exec("python " + tmpPlanPath + argsBuilder.toString());
 		sender = new RawSender(null, process.getOutputStream());
 		receiver = new RawReceiver(null, process.getInputStream());
 		new StreamPrinter(process.getErrorStream()).start();
@@ -281,14 +285,14 @@ public class PythonExecutor {
 	private static void createCsvSource() throws IOException {
 		int id = (Integer) receiver.receiveRecord();
 		Tuple args = (Tuple) receiver.receiveRecord();
-		Tuple t = createTuple(args.getArity() - 1);
+		Tuple t = createTuple(args.getArity() - 3);
 		Class[] classes = new Class[t.getArity()];
-		for (int x = 0; x < args.getArity() - 1; x++) {
-			t.setField(args.getField(x + 1), x);
+		for (int x = 0; x < args.getArity() - 3; x++) {
+			t.setField(args.getField(x + 3), x);
 			classes[x] = t.getField(x).getClass();
 		}
 		DataSet<Tuple> set = env.createInput(
-				new CsvInputFormat(new Path((String) args.getField(0)), classes),
+				new CsvInputFormat(new Path((String) args.getField(0)), (String) args.getField(1), ((String) args.getField(2)).charAt(0), classes),
 				getForObject(t));
 		sets.put(id, set);
 	}
@@ -374,8 +378,8 @@ public class PythonExecutor {
 	}
 
 	private static void createCsvSink(int id, Tuple args) {
-		CsvOutputFormat out = new CsvOutputFormat(new Path((String) args.getField(0)));
-		switch ((Integer) args.getField(1)) {
+		CsvOutputFormat out = new CsvOutputFormat(new Path((String) args.getField(0)), (String) args.getField(1), (String) args.getField(2));
+		switch ((Integer) args.getField(3)) {
 			case 0:
 				out.setWriteMode(FileSystem.WriteMode.NO_OVERWRITE);
 				break;

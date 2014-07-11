@@ -46,7 +46,7 @@ class Environment(object):
         #specials
         self._broadcast = []
 
-    def read_csv(self, path, *types):
+    def read_csv(self, path, types, line_delimiter="\n", field_delimiter='|'):
         """
         Create a DataSet that represents the tuples produced by reading the given CSV file.
 
@@ -54,7 +54,7 @@ class Environment(object):
         :param types: Specifies the types for the CSV fields.
         :return:A CsvReader that can be used to configure the CSV input.
         """
-        return self._create(CSVInputFormat(path, types))
+        return self._create_input(CSVInputFormat(path, types, line_delimiter, field_delimiter))
 
     def read_text(self, path):
         """

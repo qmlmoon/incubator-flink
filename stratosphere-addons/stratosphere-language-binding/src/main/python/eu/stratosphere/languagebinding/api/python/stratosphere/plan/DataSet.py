@@ -21,6 +21,9 @@ try:
 except:
     import pickle
 
+class WriteMode(object):
+    NO_OVERWRITE = 0
+    OVERWRITE = 1
 
 class Set(object):
     def __init__(self, env):
@@ -34,7 +37,7 @@ class Set(object):
         """
         self._create_sink(PrintingOutputFormat())
 
-    def write_text(self, path, write_mode):
+    def write_text(self, path, write_mode=WriteMode.NO_OVERWRITE):
         """
         Writes a DataSet as a text file to the specified location.
 
@@ -43,7 +46,7 @@ class Set(object):
         """
         self._create_sink(TextOutputFormat(path, write_mode))
 
-    def write_csv(self, path, write_mode):
+    def write_csv(self, path, line_delimiter="\n", field_delimiter='|', write_mode=WriteMode.NO_OVERWRITE):
         """
         Writes a Tuple DataSet as a CSV file to the specified location.
 
@@ -51,7 +54,7 @@ class Set(object):
         :param path: The path pointing to the location the CSV file is written to.
         :param write_mode: OutputFormat.WriteMode value, indicating whether files should be overwritten
         """
-        self._create_sink(CSVOutputFormat(path, write_mode))
+        self._create_sink(CSVOutputFormat(path, line_delimiter, field_delimiter, write_mode))
 
     def _create_sink(self, output_format):
         dic = dict()

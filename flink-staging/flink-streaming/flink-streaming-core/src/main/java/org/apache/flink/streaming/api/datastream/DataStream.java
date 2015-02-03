@@ -29,6 +29,8 @@ import org.apache.flink.api.common.functions.RichFilterFunction;
 import org.apache.flink.api.common.functions.RichFlatMapFunction;
 import org.apache.flink.api.common.functions.RichMapFunction;
 import org.apache.flink.api.common.functions.RichReduceFunction;
+import org.apache.flink.streaming.api.function.FoldFunction;
+import org.apache.flink.streaming.api.function.RichFoldFunction;
 import org.apache.flink.api.common.io.OutputFormat;
 import org.apache.flink.api.common.typeinfo.BasicArrayTypeInfo;
 import org.apache.flink.api.common.typeinfo.PrimitiveArrayTypeInfo;
@@ -62,6 +64,7 @@ import org.apache.flink.streaming.api.invokable.operator.FilterInvokable;
 import org.apache.flink.streaming.api.invokable.operator.FlatMapInvokable;
 import org.apache.flink.streaming.api.invokable.operator.MapInvokable;
 import org.apache.flink.streaming.api.invokable.operator.StreamReduceInvokable;
+import org.apache.flink.streaming.api.invokable.operator.StreamFoldInvokable;
 import org.apache.flink.streaming.api.windowing.helper.Count;
 import org.apache.flink.streaming.api.windowing.helper.Delta;
 import org.apache.flink.streaming.api.windowing.helper.Time;
@@ -511,6 +514,25 @@ public class DataStream<OUT> {
 
 		return transform("Reduce", getType(), new StreamReduceInvokable<OUT>(clean(reducer)));
 
+	}
+
+	/**
+	 * Applies a fold transformation on the data stream. The user can also
+	 * extend the {@link RichFoldFunction} to gain access to other features
+	 * provided by the
+	 * {@link org.apache.flink.api.common.functions.RichFunction} interface.
+	 *
+	 * @param initial
+	 * 			  The start value.
+	 * @param folder
+	 *            The {@link FoldFunction} that will be called for every
+	 *            element of the DataStream
+	 * @param <T>
+	 * @return The transformed DataStream
+	 */
+	public <T> SingleOutputStreamOperator<T, ?> fold(T initial, FoldFunction<OUT, T> folder) {
+		return transform("fold", TypeExtractor.getForObject(initial),
+			new StreamFoldInvokable<OUT, T>(initial, clean(folder)));
 	}
 
 	/**
